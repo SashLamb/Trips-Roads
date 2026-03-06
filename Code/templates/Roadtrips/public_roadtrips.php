@@ -253,18 +253,14 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
 
                                 <?= $this->Form->hidden('roadtrip_id', ['value' => $rt->id]) ?>
 
-                                <div class="form-group">
-                                    <label class="form-label">Note</label>
-                                    <?= $this->Form->select('rating', [
-                                        5 => '5 ⭐ — Excellent',
-                                        4 => '4 ⭐ — Très bien',
-                                        3 => '3 ⭐ — Bien',
-                                        2 => '2 ⭐ — Passable',
-                                        1 => '1 ⭐ — Décevant',
-                                    ], [
-                                        'class' => 'form-select',
-                                        'empty' => '-- Choisir une note --',
-                                    ]) ?>
+                                <div class="form-group rating-group">
+                                    <label class="form-label">Votre note</label>
+                                    <div class="modern-star-rating">
+                                        <?php for ($i = 5; $i >= 1; $i--): ?>
+                                            <input type="radio" id="star<?= $i ?>-<?= $rt->id ?>" name="rating" value="<?= $i ?>" required />
+                                            <label for="star<?= $i ?>-<?= $rt->id ?>" title="<?= $i ?> étoiles">★</label>
+                                        <?php endfor; ?>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">

@@ -3,118 +3,161 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Entity\Message;
+use Cake\Http\Exception\ForbiddenException;
+
 /**
- * Comments Controller
+ * Messages Controller
  *
- * @property \App\Model\Table\CommentsTable $Comments
+ * Gère la messagerie interne entre les utilisateurs (amis).
+ * * @property \App\Model\Table\MessagesTable $Messages
  */
-class CommentsController extends AppController
+class MessagesController extends AppController
 {
     /**
      * Index method
+     * * Affiche la page principale de la messagerie.
+     * La récupération des conversations pour la barre latérale est gérée directement par une Cell dans la vue.
      *
      * @return \Cake\Http\Response|null|void Renders view
      */
     public function index()
     {
+        $userId = $this->Authentication->getIdentity()->getIdentifier();
 
-        $query = $this->Comments->find()
-            ->contain(['Users', 'Roadtrips', 'PointsOfInterests']);
-        $comments = $this->paginate($query);
+        $this->set([
+            'userId' => $userId
+        ]);
+    }
 
-        $this->set(compact('comments'));
+    /**
+     * Start method
+     * * Initialise ou vérifie l'existence d'une conversation avec un ami avant d'y accéder.
+     * Applique une sécurité pour empêcher de discuter avec soi-même ou avec un non-ami.
+     *
+     * @param string|int|null $amiId L'identifiant de l'utilisateur avec qui démarrer la conversation.
+     * @return \Cake\Http\Response|null Redirige vers l'action view de la conversation.
+     * @throws \Cake\Http\Exception\ForbiddenException Si l'utilisateur tente de se parler à lui-même ou s'ils ne sont pas amis.
+     */
+    public function start($amiId = null)
+    {
+        $userId = $this->Authentication->getIdentity()->getIdentifier();
+        $amiId = (int)$amiId;
+
+        if ($userId === $amiId) {
+            throw new ForbiddenException("Vous ne pouvez pas discuter avec vous-même.");
+        }
+
+        $friendshipsTable = $this->getTableLocator()->get('Friendships');
+        $isFriend = $friendshipsTable->find()
+            ->where([
+                'status' => 'accepted',
+                'OR' => [
+                    ['user_id' => $userId, 'friend_id' => $amiId],
+                    ['user_id' => $amiId, 'friend_id' => $userId],
+                ]
+            ])
+            ->first();
+
+        if (!$isFriend) {
+            throw new ForbiddenException("Vous n'êtes pas ami avec cet utilisateur.");
+        }
+
+        return $this->redirect(['action' => 'view', $amiId]);
     }
 
     /**
      * View method
+     * * Récupère et affiche l'historique des messages d'une conversation spécifique.
+     * Marque automatiquement tous les messages non lus de cet expéditeur comme "lus".
      *
-     * @param string|null $id Comment id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
+     * @param string|int|null $amiId L'identifiant de l'ami avec qui on discute.
+     * @return \Cake\Http\Response|null|void Renders view ou redirige vers l'index si l'ID est manquant.
      */
-    public function view($id = null)
+    public function view($amiId = null)
     {
-        $comment = $this->Comments->get($id, contain: ['Users', 'Roadtrips', 'PointsOfInterests']);
-        $this->set(compact('comment'));
+        $userId = $this->Authentication->getIdentity()->getIdentifier();
+        $amiId = (int)$amiId;
+
+        if (!$amiId) {
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $ami = $this->Messages->Recipients->get($amiId);
+
+        $messages = $this->Messages->find()
+            ->where([
+                'OR' => [
+                    ['sender_id' => $userId, 'recipient_id' => $amiId],
+                    ['sender_id' => $amiId, 'recipient_id' => $userId],
+                ]
+            ])
+            ->orderAsc('created')
+            ->all();
+
+        $this->Messages->updateAll(
+            ['is_read' => 1, 'read_at' => date('Y-m-d H:i:s')],
+            ['sender_id' => $amiId, 'recipient_id' => $userId, 'is_read' => 0]
+        );
+
+        $conversation_id = $amiId;
+
+        $this->set(compact(
+            'messages',
+            'ami',
+            'userId',
+            'amiId',
+            'conversation_id'
+        ));
     }
 
     /**
-     * Add method
+     * SendMessage method
+     * * Traite la soumission du formulaire d'envoi de message (requête POST).
+     * Crée l'entité de conversation si c'est le tout premier message entre ces deux utilisateurs,
+     * puis sauvegarde le message en base de données.
      *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
+     * @return \Cake\Http\Response|null Redirige l'utilisateur vers la vue de la conversation en cours.
      */
-    // src/Controller/CommentsController.php
-
-    public function add()
+    public function sendMessage()
     {
-        $comment = $this->Comments->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $comment = $this->Comments->patchEntity($comment, $this->request->getData());
-            // On force l'ID de l'utilisateur connecté
-            $comment->user_id = $this->request->getAttribute('identity')->getIdentifier();
+        $this->request->allowMethod(['post']);
+        $userId = $this->Authentication->getIdentity()->getIdentifier();
+        $amiId = (int)$this->request->getData('ami_id');
+        $body = trim($this->request->getData('body'));
 
-            if ($this->Comments->save($comment)) {
-                $this->Flash->success(__('Votre avis a été publié.'));
-                return $this->redirect($this->referer());
-            }
-            $this->Flash->error(__('Erreur lors de la sauvegarde.'));
-        }
-        return $this->redirect($this->referer());
-    }
+        $convTable = $this->Messages->Conversations;
 
-    /**
-     * Edit method
-     *
-     * @param string|null $id Comment id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function edit($id = null)
-    {
-        $comment = $this->Comments->get($id, contain: []);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $comment = $this->Comments->patchEntity($comment, $this->request->getData());
+        $conversation = $convTable->find()
+            ->where(['OR' => [
+                ['user_one_id' => $userId, 'user_two_id' => $amiId],
+                ['user_one_id' => $amiId, 'user_two_id' => $userId],
+            ]])->first();
 
-            if ($this->Comments->save($comment)) {
-                $this->Flash->success(__('The comment has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The comment could not be saved. Please, try again.'));
-        }
-        $users = $this->Comments->Users->find('list', limit: 200)->all();
-        $roadtrips = $this->Comments->Roadtrips->find('list', limit: 200)->all();
-        $pointsOfInterests = $this->Comments->PointsOfInterests->find('list', limit: 200)->all();
-        $this->set(compact('comment', 'users', 'roadtrips', 'pointsOfInterests'));
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Comment id.
-     * @return \Cake\Http\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $comment = $this->Comments->get($id);
-
-        $currentUser = $this->request->getAttribute('identity');
-        $userId = $currentUser->getIdentifier();
-        $userRole = $currentUser->role ?? 'user';
-
-        if ($comment->user_id !== $userId && $userRole !== 'admin') {
-            $this->Flash->error(__('Vous n\'avez pas les droits pour supprimer ce commentaire.'));
-            return $this->redirect($this->referer(['action' => 'index']));
+        if (!$conversation) {
+            $conversation = $convTable->newEmptyEntity();
+            $conversation = $convTable->patchEntity($conversation, [
+                'user_one_id' => $userId,
+                'user_two_id' => $amiId
+            ]);
+            $convTable->save($conversation);
         }
 
-        if ($this->Comments->delete($comment)) {
-            $this->Flash->success(__('Le commentaire a été supprimé.'));
-        } else {
-            $this->Flash->error(__('Le commentaire n\'a pas pu être supprimé. Veuillez réessayer.'));
+        $message = $this->Messages->newEmptyEntity();
+
+        $message = $this->Messages->patchEntity($message, [
+            'sender_id' => $userId,
+            'recipient_id' => $amiId,
+            'conversation_id' => $conversation->id,
+            'is_read' => 0
+        ]);
+
+        $message->body = $body;
+
+        if ($this->Messages->save($message)) {
+            return $this->redirect(['action' => 'view', $amiId]);
         }
 
-        return $this->redirect($this->referer(['action' => 'index']));
+        return $this->redirect(['action' => 'view', $amiId]);
     }
 }

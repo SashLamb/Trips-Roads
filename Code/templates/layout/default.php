@@ -52,6 +52,7 @@
         'roadTrip',
         'style',
         'view',
+        'myComments',
     ]) ?>
 
     <?= $this->fetch('meta') ?>
