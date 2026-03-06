@@ -304,19 +304,22 @@ class RoadtripsController extends AppController
         $this->request->allowMethod(['post', 'delete']);
         $roadtrip = $this->Roadtrips->get($id);
 
-        $userId = $this->request->getAttribute('identity')->getIdentifier();
-        if ($roadtrip->user_id !== $userId) {
-            $this->Flash->error('Interdit.');
+        $currentUser = $this->request->getAttribute('identity');
+        $userId = $currentUser->getIdentifier();
+        $userRole = $currentUser->role ?? 'user';
+
+        if ($roadtrip->user_id !== $userId && $userRole !== 'admin') {
+            $this->Flash->error(__('Action non autorisée. Vous n\'avez pas les droits.'));
             return $this->redirect(['action' => 'index']);
         }
 
         if ($this->Roadtrips->delete($roadtrip)) {
-            $this->Flash->success(__('Roadtrip supprimé.'));
+            $this->Flash->success(__('Le roadtrip a été supprimé avec succès.'));
         } else {
-            $this->Flash->error(__('Erreur suppression.'));
+            $this->Flash->error(__('Erreur lors de la suppression du roadtrip.'));
         }
 
-        return $this->redirect(['action' => 'myRoadtrips']);
+        return $this->redirect($this->referer(['action' => 'myRoadtrips']));
     }
 
     public function myRoadtrips()

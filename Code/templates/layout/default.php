@@ -57,7 +57,7 @@
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
 </head>
-<body>
+<body class="<?= $isAdmin ? 'admin-mode' : '' ?>">
 <?php
 $currentUser = $this->request->getAttribute('identity');
 ?>
@@ -102,6 +102,11 @@ $currentUser = $this->request->getAttribute('identity');
                         <span>Créer un Road-Trip</span>
                     </a>
                 </li>
+                <?php if ($currentUser && $currentUser->role === 'admin') : ?>
+                    <li class="nav-item">
+                        <span class="admin-badge">Mode Modérateur</span>
+                    </li>
+                <?php endif; ?>
                 <li class="nav-item" id="link_PP">
                     <span class="profil-box">
                         <?php

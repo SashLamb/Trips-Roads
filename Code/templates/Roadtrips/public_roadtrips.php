@@ -9,9 +9,11 @@
  */
 
 $this->assign('mainClass', 'dashboard-page');
+$currentUser = $this->request->getAttribute('identity');
+$isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === 'admin';
 ?>
 
-<div class="dashboard-container">
+<div class="dashboard-container <?= $isAdmin ? 'admin-mode' : '' ?>">
 
     <aside class="profil-sidebar">
         <div class="user-brief">
@@ -26,7 +28,12 @@ $this->assign('mainClass', 'dashboard-page');
             }
             ?>
             <div class="avatar-circle small" style="<?= $bgStyle ?>"></div>
-            <h3><?= $nomUser ?></h3>
+            <h3>
+                <?= $nomUser ?>
+                <?php if ($isAdmin): ?>
+                    <br><span class="admin-badge">Admin</span>
+                <?php endif; ?>
+            </h3>
         </div>
 
         <h1 class="sidebar-title">Road Trips Publics</h1>
@@ -76,9 +83,10 @@ $this->assign('mainClass', 'dashboard-page');
                     }
 
                     $nbAvis = !empty($rt->comments) ? count($rt->comments) : 0;
+                    $isOwner = $currentUser && $currentUser->getIdentifier() === $rt->user_id;
                     ?>
 
-                    <div class="roadtrip-card">
+                    <div class="roadtrip-card <?= $isAdmin ? 'admin-card' : '' ?>">
 
                         <div class="card-badges">
                             <span class="badge-statut <?= $classeStatus ?>"><?= $labelStatus ?></span>
@@ -95,7 +103,6 @@ $this->assign('mainClass', 'dashboard-page');
                         </div>
 
                         <div class="roadtrip-actions">
-
                             <a class="action-btn view"
                                href="<?= $this->Url->build(['action' => 'view', $rt->id]) ?>"
                                title="Voir le road trip">
@@ -113,17 +120,28 @@ $this->assign('mainClass', 'dashboard-page');
                                 <?php endif; ?>
                             </button>
 
-                            <?php if ($this->request->getAttribute('identity')): ?>
+                            <?php if ($currentUser): ?>
                                 <button type="button"
                                         class="action-btn btn-open-comment"
                                         data-id="<?= $rt->id ?>"
                                         onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')"
                                         title="Laisser un avis">
                                     <i class="material-icons">add_comment</i>
-                                    
                                 </button>
                             <?php endif; ?>
 
+                            <?php if ($isOwner || $isAdmin): ?>
+                                <?= $this->Form->postLink(
+                                    '<i class="material-icons">delete</i>',
+                                    ['controller' => 'Roadtrips', 'action' => 'delete', $rt->id],
+                                    [
+                                        'confirm' => 'Voulez-vous vraiment supprimer ce roadtrip ?',
+                                        'escape' => false,
+                                        'class' => 'action-btn btn-delete',
+                                        'title' => 'Supprimer le roadtrip'
+                                    ]
+                                ) ?>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -131,9 +149,7 @@ $this->assign('mainClass', 'dashboard-page');
             </div>
 
             <?php foreach ($roadtrips as $rt): ?>
-
                 <?php $nbAvis = !empty($rt->comments) ? count($rt->comments) : 0; ?>
-
 
                 <div id="modalAvis-<?= $rt->id ?>"
                      class="custom-modal"
@@ -155,7 +171,7 @@ $this->assign('mainClass', 'dashboard-page');
                                 <div class="no-comments">
                                     <i class="material-icons">chat_bubble_outline</i>
                                     <p>Aucun avis pour le moment.</p>
-                                    <?php if ($this->request->getAttribute('identity')): ?>
+                                    <?php if ($currentUser): ?>
                                         <button type="button"
                                                 class="btn-switch-to-comment"
                                                 onclick="closeRoadtripModal('modalAvis-<?= $rt->id ?>'); openRoadtripModal('modalComment-<?= $rt->id ?>')">
@@ -166,6 +182,7 @@ $this->assign('mainClass', 'dashboard-page');
                             <?php else: ?>
                                 <div class="comments-list">
                                     <?php foreach ($rt->comments as $comment): ?>
+                                        <?php $isCommentOwner = $currentUser && $currentUser->getIdentifier() === $comment->user_id; ?>
                                         <div class="comment-item">
                                             <div class="comment-meta">
                                                 <span class="comment-author">
@@ -177,12 +194,25 @@ $this->assign('mainClass', 'dashboard-page');
                                                         <?= str_repeat('⭐', (int)$comment->rating) ?>
                                                     </span>
                                                 <?php endif; ?>
+
+                                                <?php if ($isCommentOwner || $isAdmin): ?>
+                                                    <?= $this->Form->postLink(
+                                                        '<i class="material-icons">delete</i>',
+                                                        ['controller' => 'Comments', 'action' => 'delete', $comment->id],
+                                                        [
+                                                            'confirm' => 'Supprimer cet avis ?',
+                                                            'escape' => false,
+                                                            'class' => 'comment-delete-btn',
+                                                            'title' => 'Supprimer l\'avis'
+                                                        ]
+                                                    ) ?>
+                                                <?php endif; ?>
                                             </div>
                                             <p class="comment-body"><?= h($comment->body) ?></p>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
-                                <?php if ($this->request->getAttribute('identity')): ?>
+                                <?php if ($currentUser): ?>
                                     <div class="modal-footer-action">
                                         <button type="button"
                                                 class="btn-switch-to-comment"
@@ -196,8 +226,7 @@ $this->assign('mainClass', 'dashboard-page');
                     </div>
                 </div>
 
-                <?php /* ---- MODALE COMMENTER (connectés seulement) ---- */ ?>
-                <?php if ($this->request->getAttribute('identity')): ?>
+                <?php if ($currentUser): ?>
                     <div id="modalComment-<?= $rt->id ?>"
                          class="custom-modal"
                          onclick="if(event.target===this) closeRoadtripModal('modalComment-<?= $rt->id ?>')">

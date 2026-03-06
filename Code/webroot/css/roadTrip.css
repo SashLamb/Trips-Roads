@@ -53,6 +53,10 @@
     color: white;
 }
 
+
+
+
+
 /* ==============================
    SECTION 2 : ROAD TRIPS (VITRINE)
 ============================== */
@@ -794,4 +798,31 @@
         width: 100%;
         justify-content: center;
     }
+}
+
+/* ==============================
+   SECTION  ADMIN
+============================== */
+.admin-badge {
+    background-color: var(--rouge);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.btn-delete-admin {
+    background-color: var(--rouge);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
 }

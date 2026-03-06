@@ -99,12 +99,22 @@ class CommentsController extends AppController
     {
         $this->request->allowMethod(['post', 'delete']);
         $comment = $this->Comments->get($id);
-        if ($this->Comments->delete($comment)) {
-            $this->Flash->success(__('The comment has been deleted.'));
-        } else {
-            $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
+
+        $currentUser = $this->request->getAttribute('identity');
+        $userId = $currentUser->getIdentifier();
+        $userRole = $currentUser->role ?? 'user';
+
+        if ($comment->user_id !== $userId && $userRole !== 'admin') {
+            $this->Flash->error(__('Vous n\'avez pas les droits pour supprimer ce commentaire.'));
+            return $this->redirect($this->referer(['action' => 'index']));
         }
 
-        return $this->redirect(['action' => 'index']);
+        if ($this->Comments->delete($comment)) {
+            $this->Flash->success(__('Le commentaire a été supprimé.'));
+        } else {
+            $this->Flash->error(__('Le commentaire n\'a pas pu être supprimé. Veuillez réessayer.'));
+        }
+
+        return $this->redirect($this->referer(['action' => 'index']));
     }
 }
