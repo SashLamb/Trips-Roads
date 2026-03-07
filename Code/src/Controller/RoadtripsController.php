@@ -511,14 +511,14 @@ class RoadtripsController extends AppController
         foreach ($trips as $trip) {
             $sousEtapes = [];
             foreach ($trip->sub_steps as $step) {
-
                 $heureFormattee = '';
+
                 if (!empty($step->duration)) {
-                    if ($step->duration instanceof \DateTimeInterface) {
+                    if (is_object($step->duration) && method_exists($step->duration, 'format')) {
                         $heureFormattee = $step->duration->format('H:i');
                     }
-                    elseif (is_string($step->duration)) {
-                        $heureFormattee = substr($step->duration, 0, 5);
+                    else {
+                        $heureFormattee = substr((string)$step->duration, 0, 5);
                     }
                 }
 
