@@ -53,6 +53,10 @@
     color: white;
 }
 
+
+
+
+
 /* ==============================
    SECTION 2 : ROAD TRIPS (VITRINE)
 ============================== */
@@ -333,9 +337,11 @@
     list-style: none;
     padding: 0;
 }
+
 .profil-nav li {
     margin-bottom: 5px;
 }
+
 .profil-nav a {
     display: block;
     padding: 10px 15px;
@@ -356,12 +362,15 @@
 }
 
 .dashboard-content,
-.roadtrip-grid {
+.main-content {
     flex: 1;
-    width: 0;
+    min-width: 0;
 }
 
+
 .roadtrip-grid {
+    flex: 1;
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
@@ -794,4 +803,31 @@
         width: 100%;
         justify-content: center;
     }
+}
+
+/* ==============================
+   SECTION  ADMIN
+============================== */
+.admin-badge {
+    background-color: var(--rouge);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.btn-delete-admin {
+    background-color: var(--rouge);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
 }
