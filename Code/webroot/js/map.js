@@ -449,22 +449,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const resp = await fetch(url);
             const data = await resp.json();
-            const route = data.routes[0];
 
             const color = segmentColors[index % segmentColors.length];
+            let line;
+            let routeDistance = 0;
+            let routeDuration = 0;
+            let routeLegs = null;
 
-            const lineStyle = {
-                color: color,
-                weight: 6,
-                opacity: 0.8,
-                dashArray: modeTransport !== 'Voiture' ? '10, 10' : null
-            };
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                routeDistance = route.distance;
+                routeDuration = route.duration;
+                routeLegs = route.legs;
 
-            const line = L.geoJSON(route.geometry, lineStyle).addTo(map);
+                const lineStyle = {
+                    color: color,
+                    weight: 6,
+                    opacity: 0.8,
+                    dashArray: modeTransport !== 'Voiture' ? '10, 10' : null
+                };
+                line = L.geoJSON(route.geometry, lineStyle).addTo(map);
+            }
+            else {
+                console.warn("⚠️ Impossible de tracer la route pour : " + startName + " -> " + endName, data);
+                line = L.polyline(coordsList, {color: 'red', weight: 4, dashArray: '5, 10'}).addTo(map);
+            }
+
             map.fitBounds(line.getBounds(), { padding: [50, 50] });
 
             const segData = {
-                line,
+                line: line,
                 startName, startCoord: startCoords,
                 endName, endCoord: endCoords,
                 couleurSegment: color,
@@ -474,9 +488,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modeTransport: modeTransport,
                 options: {},
                 date: existingData ? existingData.date_trajet : '',
-                distance: route.distance,
-                duration: route.duration,
-                legs: route.legs
+                distance: routeDistance,
+                duration: routeDuration,
+                legs: routeLegs
             };
             segments.push(segData);
 
@@ -524,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateLegendHtml(index);
 
         } catch (e) {
-            console.error(e);
+            console.error("Erreur fatale lors de l'ajout du segment :", e);
         }
     }
 

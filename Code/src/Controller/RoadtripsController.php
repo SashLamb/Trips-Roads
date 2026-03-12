@@ -801,4 +801,41 @@ class RoadtripsController extends AppController
             ->withType('application/json')
             ->withStringBody(json_encode($response));
     }
+
+    public function exportPdf($id = null)
+    {
+        try {
+            $roadtrip = $this->Roadtrips->get($id, [
+                'contain' => [
+                    'Users',
+                    'Trips' => [
+                        'sort' => ['Trips.order_number' => 'ASC'],
+                        'SubSteps' => [
+                            'sort' => ['SubSteps.order_number' => 'ASC']
+                        ]
+                    ]
+                ]
+            ]);
+        } catch (\Cake\Datasource\Exception\RecordNotFoundException $e) {
+            $this->Flash->error(__('Road trip introuvable.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $currentUserId = $this->request->getAttribute('identity')?->getIdentifier();
+        $isOwner = ($currentUserId === $roadtrip->user_id);
+
+        if (!$isOwner && $roadtrip->visibility !== 'public') {
+            $this->Flash->error(__('Ce road trip est privé et ne peut être exporté.'));
+            return $this->redirect(['action' => 'index']);
+        }
+
+        $this->viewBuilder()
+            ->setClassName('CakePdf.Pdf')
+            ->setOption('pdfConfig', [
+                'orientation' => 'portrait',
+                'filename' => 'Carnet_de_route_' . preg_replace('/[^a-zA-Z0-9]/', '_', $roadtrip->title) . '.pdf'
+            ]);
+
+        $this->set(compact('roadtrip'));
+    }
 }
