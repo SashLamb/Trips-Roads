@@ -12,7 +12,7 @@ use Cake\Http\Exception\ForbiddenException;
  * Gère la messagerie interne entre les utilisateurs (amis).
  * * @property \App\Model\Table\MessagesTable $Messages
  */
-class MessagesController extends AppController
+class CommentsController extends AppController
 {
     /**
      * Index method
