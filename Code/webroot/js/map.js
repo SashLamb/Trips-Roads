@@ -90,14 +90,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             zoom: 5,
             codes: ["fr", "be", "ch", "lu", "de", "at", "li", "it", "sm", "va", "es", "pt", "ad", "gb", "ie", "nl", "dk", "no", "se", "fi", "is", "pl", "cz", "sk", "hu", "ee", "lv", "lt", "ro", "bg", "gr", "cy", "mt", "si", "hr", "ba", "rs", "me", "al", "mk", "xk", "ua", "md", "by", "ge", "am", "az"]
         },
-        'north_america': {
+        'america': {
             center: [39.8283, -98.5795],
             zoom: 4,
             codes: ["us", "ca", "mx"]
         }
     };
 
-    let currentRegion = 'europe';
+    let currentRegion = document.getElementById('regionSelect') ? document.getElementById('regionSelect').value : 'europe';
 
     let map = L.map('map').setView(regionsConfig[currentRegion].center, regionsConfig[currentRegion].zoom);
 
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return null;
         } catch (e) {
-            console.error(e);
+            console.error("Erreur de géocodage:", e);
             return null;
         }
     }
@@ -418,7 +418,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     heure_depart: t.heure_depart,
                     sousEtapes: sousEtapesWithCoords
                 };
-
                 await _ajouterSegmentEntre(t.depart, startCoords, t.arrivee, endCoords, segments.length, strategies[t.mode], dataForJs);
 
                 currentStartCity = t.arrivee;
@@ -450,22 +449,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const resp = await fetch(url);
             const data = await resp.json();
-            const route = data.routes[0];
 
             const color = segmentColors[index % segmentColors.length];
+            let line;
+            let routeDistance = 0;
+            let routeDuration = 0;
+            let routeLegs = null;
 
-            const lineStyle = {
-                color: color,
-                weight: 6,
-                opacity: 0.8,
-                dashArray: modeTransport !== 'Voiture' ? '10, 10' : null
-            };
+            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+                const route = data.routes[0];
+                routeDistance = route.distance;
+                routeDuration = route.duration;
+                routeLegs = route.legs;
 
-            const line = L.geoJSON(route.geometry, lineStyle).addTo(map);
+                const lineStyle = {
+                    color: color,
+                    weight: 6,
+                    opacity: 0.8,
+                    dashArray: modeTransport !== 'Voiture' ? '10, 10' : null
+                };
+                line = L.geoJSON(route.geometry, lineStyle).addTo(map);
+            }
+            else {
+                console.warn("⚠️ Impossible de tracer la route pour : " + startName + " -> " + endName, data);
+                line = L.polyline(coordsList, {color: 'red', weight: 4, dashArray: '5, 10'}).addTo(map);
+            }
+
             map.fitBounds(line.getBounds(), { padding: [50, 50] });
 
             const segData = {
-                line,
+                line: line,
                 startName, startCoord: startCoords,
                 endName, endCoord: endCoords,
                 couleurSegment: color,
@@ -475,9 +488,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modeTransport: modeTransport,
                 options: {},
                 date: existingData ? existingData.date_trajet : '',
-                distance: route.distance,
-                duration: route.duration,
-                legs: route.legs
+                distance: routeDistance,
+                duration: routeDuration,
+                legs: routeLegs
             };
             segments.push(segData);
 
@@ -525,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateLegendHtml(index);
 
         } catch (e) {
-            console.error(e);
+            console.error("Erreur fatale lors de l'ajout du segment :", e);
         }
     }
 
@@ -745,7 +758,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return (h * 3600) + (m * 60);
         }
 
-        // En-tête du résumé
         html += `<div class="summary-container">`;
         html += `<div class="summary-step start">📍 Départ à <strong>${currentClock}</strong></div>`;
 
@@ -969,7 +981,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             formData.append('title', document.getElementById('roadtripTitle').value);
             formData.append('description', document.getElementById('roadtripDescription').value);
             formData.append('visibility', document.getElementById('roadtripVisibilite').value);
-            formData.append('status', document.getElementById('roadtripStatut').value);
+            formData.append('status', document.getElementById('roadtripStatut').value)
+            formData.append('place', document.getElementById('regionSelect').value);
 
             const fileInput = document.getElementById('roadtripPhoto');
             if(fileInput.files.length > 0) {
@@ -1072,6 +1085,110 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.disabled = false;
         }
     };
+
+    // ============================================================
+    // 9. GESTION DE L'ASSISTANT IA
+    // ============================================================
+
+    const btnGenerateAI = document.getElementById('btnGenerateAI');
+
+    if (btnGenerateAI) {
+        btnGenerateAI.addEventListener('click', async function() {
+            // Récupération des champs
+            const depart = document.getElementById('aiDepart').value.trim();
+            const destination = document.getElementById('aiDestination').value.trim();
+            const duree = document.getElementById('aiDuree').value.trim();
+            const theme = document.getElementById('aiTheme').value.trim();
+
+            if (!depart || !destination) {
+                alert("Veuillez indiquer au moins une ville de départ et une destination.");
+                return;
+            }
+
+            // UI Chargement
+            const loader = document.getElementById('aiLoading');
+            const resultBox = document.getElementById('aiResultBox');
+
+            loader.style.display = 'block';
+            resultBox.style.display = 'none';
+            btnGenerateAI.disabled = true;
+            btnGenerateAI.textContent = "⏳ Génération en cours...";
+
+            // Préparation Données
+            const formData = new FormData();
+            formData.append('depart', depart);
+            formData.append('destination', destination);
+            formData.append('duree', duree);
+            formData.append('theme', theme);
+
+            // Vérification que les constantes PHP sont bien définies
+            const urlAI = typeof AI_GENERATE_URL !== 'undefined' ? AI_GENERATE_URL : '/roadtrips/genererRoadtripGratuit';
+            const token = typeof CSRF_TOKEN !== 'undefined' ? CSRF_TOKEN : '';
+
+            try {
+                const response = await fetch(urlAI, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-Token': token,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    const data = result.data;
+
+                    // A. Remplir Titre & Description
+                    const titleInput = document.getElementById('roadtripTitle');
+                    const descInput = document.getElementById('roadtripDescription');
+
+                    let shouldFill = true;
+                    if (titleInput.value !== '' || descInput.value !== '') {
+                        shouldFill = confirm("L'IA a généré un titre et une description. Voulez-vous remplacer votre texte actuel ?");
+                    }
+
+                    if (shouldFill) {
+                        if (data.titre) titleInput.value = data.titre;
+                        if (data.description) descInput.value = data.description;
+
+                        // Effet visuel
+                        titleInput.style.backgroundColor = "#d5f5e3"; // Vert très clair
+                        setTimeout(() => titleInput.style.backgroundColor = "", 1500);
+                    }
+
+                    // B. Afficher les étapes
+                    let htmlEtapes = '<ul>';
+                    if (data.etapes && Array.isArray(data.etapes)) {
+                        data.etapes.forEach(etape => {
+                            htmlEtapes += `<li>
+                                <strong>${etape.ville}</strong>
+                                <br><small style="color:var(--gris_fonce)">👀 À voir : ${etape.lieux || etape.activites || 'Centre ville'}</small>
+                            </li>`;
+                        });
+                    } else {
+                        htmlEtapes += '<li>Aucune étape spécifique suggérée, trajet direct.</li>';
+                    }
+                    htmlEtapes += '</ul>';
+
+                    document.getElementById('aiResultContent').innerHTML = htmlEtapes;
+                    resultBox.style.display = 'block';
+
+                } else {
+                    alert("L'IA n'a pas pu générer de résultat : " + (result.message || 'Erreur inconnue'));
+                }
+
+            } catch (error) {
+                console.error("Erreur Fetch IA:", error);
+                alert("Une erreur de connexion est survenue avec l'assistant IA.");
+            } finally {
+                loader.style.display = 'none';
+                btnGenerateAI.disabled = false;
+                btnGenerateAI.textContent = "🚀 Générer des idées";
+            }
+        });
+    }
 
     function showToast(message) {
         let existingToast = document.querySelector('.toast-notification');
