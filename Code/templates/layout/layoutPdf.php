@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <title><?= $this->fetch('title') ?></title>
 
-    <?= $this->Html->css('pdfStyle', ['fullBase' => true]) ?>
+    <style>
+        <?= file_get_contents(WWW_ROOT . 'css' . DS . 'pdfStyle.css') ?>
+    </style>
 
 </head>
 <body>

@@ -844,8 +844,6 @@ class RoadtripsController extends AppController
         $html = $view->render();
 
         $options = new Options();
-        $options->set('isRemoteEnabled', true);
-
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
