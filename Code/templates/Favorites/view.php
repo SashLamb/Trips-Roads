@@ -16,25 +16,18 @@
     </aside>
     <div class="column column-80">
         <div class="favorites view content">
-            <h3><?= h($favorite->id) ?></h3>
+            <h3>Détail du favori #<?= h($favorite->id) ?></h3>
             <table>
                 <tr>
-                    <th><?= __('User') ?></th>
-                    <td><?= $favorite->hasValue('user') ? $this->Html->link($favorite->user->last_name, ['controller' => 'Users', 'action' => 'view', $favorite->user->id]) : '' ?></td>
-                </tr>
-                <tr>
                     <th><?= __('Roadtrip') ?></th>
-                    <td><?= $favorite->hasValue('roadtrip') ? $this->Html->link($favorite->roadtrip->title, ['controller' => 'Roadtrips', 'action' => 'view', $favorite->roadtrip->id]) : '' ?></td>
+                    <td><?= $favorite->hasValue('roadtrip') ? $this->Html->link($favorite->roadtrip->titre, ['controller' => 'Roadtrips', 'action' => 'view', $favorite->roadtrip->id]) : '' ?></td>
                 </tr>
                 <tr>
-                    <th><?= __('Id') ?></th>
-                    <td><?= $this->Number->format($favorite->id) ?></td>
-                </tr>
-                <tr>
-                    <th><?= __('Created') ?></th>
+                    <th><?= __('Ajouté le') ?></th>
                     <td><?= h($favorite->created) ?></td>
                 </tr>
             </table>
+            <?= $this->Html->link(__('Retour'), ['action' => 'index'], ['class' => 'side-nav-item']) ?>
         </div>
     </div>
 </div>

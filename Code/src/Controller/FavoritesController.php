@@ -17,9 +17,13 @@ class FavoritesController extends AppController
      */
     public function index()
     {
+        $userId = $this->Authentication->getIdentity()->getIdentifier();
+
         $query = $this->Favorites->find()
-            ->contain(['Users', 'Roadtrips']);
-        $favorites = $this->paginate($query);
+            ->where(['Favorites.user_id' => $userId])
+            ->contain(['Roadtrips','Roadtrips.Users', 'Roadtrips.Comments']);
+
+        $favorites = $query->all();
 
         $this->set(compact('favorites'));
     }

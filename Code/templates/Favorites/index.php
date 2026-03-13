@@ -5,49 +5,34 @@
  */
 ?>
 <div class="favorites index content">
-    <h3><?= __('Favorites') ?></h3>
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th><?= $this->Paginator->sort('id') ?></th>
-                    <th><?= $this->Paginator->sort('user_id') ?></th>
-                    <th><?= $this->Paginator->sort('roadtrip_id') ?></th>
-                    <th><?= $this->Paginator->sort('created') ?></th>
-                    <th class="actions"><?= __('Actions') ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($favorites as $favorite): ?>
-                <tr>
-                    <td><?= $favorite->hasValue('user') ? $this->Html->link($favorite->user->last_name, ['controller' => 'Users', 'action' => 'view', $favorite->user->id]) : '' ?></td>
-                    <td><?= $favorite->hasValue('roadtrip') ? $this->Html->link($favorite->roadtrip->title, ['controller' => 'Roadtrips', 'action' => 'view', $favorite->roadtrip->id]) : '' ?></td>
-                    <td><?= h($favorite->created) ?></td>
-                    <td class="actions">
-                        <?= $this->Html->link(__('View'), ['action' => 'view', $favorite->id]) ?>
-                        <?= $this->Html->link(__('Edit'), ['action' => 'edit', $favorite->id]) ?>
+    <h1 class="sidebar-title">Mes Road Trips Favoris</h1>
+
+    <?php if ($favorites->isEmpty()) : ?>
+        <p class="empty-state">Vous n'avez pas encore de favoris.</p>
+    <?php else : ?>
+        <div class="roadtrip-grid">
+            <?php foreach ($favorites as $fav): ?>
+                <?php $rt = $fav->roadtrip; ?>
+                <div class="roadtrip-card">
+                    <?= $this->Html->image('/uploads/roadtrips/' . ($rt->photo_url ?: 'imgBase.png'), ['class' => 'roadtrip-photo']) ?>
+                    <div class="card-body">
+                        <h3><?= h($rt->title) ?></h3>
+                        <p class="card-description"><?= h($this->Text->truncate($rt->description, 100)) ?></p>
+                    </div>
+
+                    <div class="roadtrip-actions">
+                        <a class="action-btn view" href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'view', $rt->id]) ?>">
+                            <i class="material-icons">visibility</i>
+                        </a>
+
                         <?= $this->Form->postLink(
-                            __('Delete'),
-                            ['action' => 'delete', $favorite->id],
-                            [
-                                'method' => 'delete',
-                                'confirm' => __('Are you sure you want to delete # {0}?', $favorite->id),
-                            ]
+                            '<i class="material-icons">favorite_border</i>',
+                            ['controller' => 'Favorites', 'action' => 'delete', $fav->id],
+                            ['confirm' => 'Retirer des favoris ?', 'escape' => false, 'class' => 'action-btn btn-delete']
                         ) ?>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <div class="paginator">
-        <ul class="pagination">
-            <?= $this->Paginator->first('<< ' . __('first')) ?>
-            <?= $this->Paginator->prev('< ' . __('previous')) ?>
-            <?= $this->Paginator->numbers() ?>
-            <?= $this->Paginator->next(__('next') . ' >') ?>
-            <?= $this->Paginator->last(__('last') . ' >>') ?>
-        </ul>
-        <p><?= $this->Paginator->counter(__('Page {{page}} of {{pages}}, showing {{current}} record(s) out of {{count}} total')) ?></p>
-    </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </div>
