@@ -1,57 +1,57 @@
-/* ==============================
-   SECTION 1 : HERO & BOUTONS
-============================== */
-.hero-actions {
-    text-align: center;
-    padding: 40px 20px;
-    background-color: var(--beige);
-}
+    /* ==============================
+       SECTION 1 : HERO & BOUTONS
+    ============================== */
+    .hero-actions {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: var(--beige_fonce);
+    }
 
-.hero-content h1 {
-    color: var(--bleu_fonce);
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
+    .hero-content h1 {
+        color: var(--beige);
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
 
-.hero-content p {
-    color: var(--bleu_fonce_ecriture);
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-}
+    .hero-content p {
+        color: var(--bleu_fonce_ecriture);
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
 
-.hero-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
+    .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
 
-.btn-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 25px;
-    border-radius: 30px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: transform 0.2s, box-shadow 0.2s;
-    font-size: 1rem;
-}
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 25px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+        font-size: 1rem;
+    }
 
-.btn-action:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
 
-.btn-action.primary {
-    background-color: var(--orange);
-    color: white;
-}
+    .btn-action.primary {
+        background-color: var(--orange);
+        color: white;
+    }
 
-.btn-action.secondary {
-    background-color: var(--bleu_clair);
-    color: white;
-}
+    .btn-action.secondary {
+        background-color: var(--bleu_clair);
+        color: white;
+    }
 
 
 
@@ -62,13 +62,13 @@
 ============================== */
 .featured-section {
     padding: 20px 40px 40px 40px;
-    max-width: 1400px;
     margin: 0 auto;
+    background-color: var(--beige_fonce);
 }
 
 .featured-section h2 {
     text-align: center;
-    color: var(--bleu_fonce);
+    color: var(--beige);
     margin-bottom: 30px;
     position: relative;
     display: inline-block;
@@ -132,7 +132,6 @@
 .full-map-container {
     position: relative;
     width: 100%;
-    height: 70vh;
     min-height: 500px;
     overflow: hidden;
 }
@@ -199,7 +198,7 @@
 }
 
 .sidebar-content {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--beige);
     backdrop-filter: blur(5px);
     border-radius: 15px;
     box-shadow: 0 5px 25px rgba(0,0,0,0.2);
@@ -398,13 +397,14 @@
     object-fit: cover;
 }
 .card-body {
+    background-color: var(--beige_fonce);
     padding: 15px;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
 .card-description {
-    color: #666;
+    color: var(--bleu_fonce_ecriture);
     font-size: 0.9rem;
     margin-bottom: 10px;
     flex: 1;
@@ -415,30 +415,27 @@
     margin-top: auto;
 }
 
-
-
+/* --- Actions bas de carte --- */
 .roadtrip-actions {
-    padding: 10px 8px;
+    background-color: var(--beige_fonce);
+    padding: 10px 15px;
     border-top: 1px solid #eee;
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: center;
-    background: #f9f9f9;
-    gap: 4px;
+    gap: 8px;
 }
-
 .action-btn {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
-    padding: 6px 6px;
+    gap: 4px;
+    padding: 6px 10px;
     border-radius: 8px;
     color: #888;
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: color 0.2s, background 0.2s, transform 0.2s;
+    transition: color 0.2s, background 0.2s;
     text-decoration: none;
     font-size: 0.85rem;
     position: relative;
@@ -449,6 +446,7 @@
 }
 .action-btn.delete:hover { color: var(--rouge); }
 
+/* Badge compteur d'avis sur le bouton */
 .avis-count {
     display: inline-flex;
     align-items: center;
