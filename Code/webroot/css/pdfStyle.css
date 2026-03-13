@@ -143,3 +143,25 @@ body {
     margin-top: 8px;
 }
 
+.markdown-to-html h1, .markdown-to-html h2, .markdown-to-html h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 8px 0 4px;
+}
+.markdown-to-html ul, .markdown-to-html ol {
+    padding-left: 20px;
+    margin: 6px 0;
+}
+.markdown-to-html p {
+    margin: 4px 0;
+}
+.markdown-to-html a {
+    color: #39B2A5;
+    text-decoration: underline;
+}
+.markdown-to-html code {
+    background: #f4f4f4;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+}

@@ -109,6 +109,13 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 <i class="material-icons">visibility</i>
                             </a>
 
+                            <a class="action-btn"
+                               href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportPdf', $rt->id]) ?>"
+                               title="Télécharger en PDF"
+                               target="_blank">
+                                <i class="material-icons">picture_as_pdf</i>
+                            </a>
+
                             <button type="button"
                                     class="action-btn btn-open-avis"
                                     data-id="<?= $rt->id ?>"

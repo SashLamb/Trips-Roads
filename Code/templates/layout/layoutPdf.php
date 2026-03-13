@@ -15,5 +15,6 @@
 <div class="footer-pdf">
     Carnet de route généré le <?= date('d/m/Y') ?>
 </div>
+
 </body>
 </html>
