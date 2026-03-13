@@ -129,6 +129,12 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 </button>
                             <?php endif; ?>
 
+                            <a class="action-btn"
+                               href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportGpx', $rt->id]) ?>"
+                               title="Exporter en GPX">
+                                <i class="material-icons">file_download</i>
+                            </a>
+
                             <?php if ($isOwner || $isAdmin): ?>
                                 <?= $this->Form->postLink('<i class="material-icons">delete</i>',
                                     ['controller' => 'Roadtrips', 'action' => 'delete', $rt->id],
