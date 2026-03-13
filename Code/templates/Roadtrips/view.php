@@ -30,8 +30,23 @@ $getIcon = fn($m) => $transportIcons[strtolower($m ?? '')] ?? '🚗';
             </div>
         <?php endif; ?>
 
-        <h1><?= h($roadtrip->title) ?></h1>
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+            <h1 style="margin: 0;"><?= h($roadtrip->title) ?></h1>
 
+            <?php if ($roadtrip->visibility === 'public' || (isset($isOwner) && $isOwner)): ?>
+                <?= $this->Html->link(
+                    '📄 Télécharger en PDF',
+                    ['controller' => 'Roadtrips', 'action' => 'exportPdf', $roadtrip->id],
+                    [
+                        'class' => 'btn-export-pdf',
+                        'style' => 'background-color: #e74c3c; color: white; padding: 10px 15px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.3s;',
+                        'target' => '_blank',
+                        'title' => 'Exporter ce carnet de route'
+                    ]
+                ) ?>
+            <?php endif; ?>
+        </div>
         <div class="roadtrip-meta">
             <div class="author-pill">
                 <?php
