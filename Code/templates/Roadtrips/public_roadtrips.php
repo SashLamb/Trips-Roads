@@ -103,50 +103,36 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                         </div>
 
                         <div class="roadtrip-actions">
-                            <a class="action-btn view"
-                               href="<?= $this->Url->build(['action' => 'view', $rt->id]) ?>"
-                               title="Voir le road trip">
+                            <a class="action-btn view" href="<?= $this->Url->build(['action' => 'view', $rt->id]) ?>" title="Voir">
                                 <i class="material-icons">visibility</i>
                             </a>
 
-                            <a class="action-btn view"
-                                href="<?= $this->Url->build(['controller' => 'Favorites', 'action' => 'view', $favorite->id]) ?>"
-                                title="Voir le favori">
-                                <i class="material-icons">favorite</i>
-                            </a>
-
-                            <button type="button"
-                                    class="action-btn btn-open-avis"
-                                    data-id="<?= $rt->id ?>"
-                                    onclick="openRoadtripModal('modalAvis-<?= $rt->id ?>')"
-                                    title="Voir les avis (<?= $nbAvis ?>)">
-                                <i class="material-icons">rate_review</i>
-                                <?php if ($nbAvis > 0): ?>
-                                    <span class="avis-count"><?= $nbAvis ?></span>
+                            <?php if ($currentUser): ?>
+                                <?php if (in_array($rt->id, $favorisIds ?? [])): ?>
+                                    <?= $this->Form->postLink('<i class="material-icons">favorite</i>',
+                                        ['controller' => 'Favorites', 'action' => 'delete', $rt->id], // Adaptez l'action si besoin
+                                        ['escape' => false, 'title' => 'Retirer des favoris']) ?>
+                                <?php else: ?>
+                                    <?= $this->Form->postLink('<i class="material-icons">favorite_border</i>',
+                                        ['controller' => 'Favorites', 'action' => 'add', '?' => ['roadtrip_id' => $rt->id]],
+                                        ['escape' => false, 'title' => 'Ajouter aux favoris']) ?>
                                 <?php endif; ?>
+                            <?php endif; ?>
+
+                            <button type="button" class="action-btn" onclick="openRoadtripModal('modalAvis-<?= $rt->id ?>')" title="Voir les avis">
+                                <i class="material-icons">rate_review</i>
                             </button>
 
                             <?php if ($currentUser): ?>
-                                <button type="button"
-                                        class="action-btn btn-open-comment"
-                                        data-id="<?= $rt->id ?>"
-                                        onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')"
-                                        title="Laisser un avis">
+                                <button type="button" class="action-btn" onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')" title="Laisser un avis">
                                     <i class="material-icons">add_comment</i>
                                 </button>
                             <?php endif; ?>
 
                             <?php if ($isOwner || $isAdmin): ?>
-                                <?= $this->Form->postLink(
-                                    '<i class="material-icons">delete</i>',
+                                <?= $this->Form->postLink('<i class="material-icons">delete</i>',
                                     ['controller' => 'Roadtrips', 'action' => 'delete', $rt->id],
-                                    [
-                                        'confirm' => 'Voulez-vous vraiment supprimer ce roadtrip ?',
-                                        'escape' => false,
-                                        'class' => 'action-btn btn-delete',
-                                        'title' => 'Supprimer le roadtrip'
-                                    ]
-                                ) ?>
+                                    ['confirm' => 'Supprimer ?', 'escape' => false, 'class' => 'action-btn btn-delete', 'title' => 'Supprimer']) ?>
                             <?php endif; ?>
                         </div>
                     </div>
