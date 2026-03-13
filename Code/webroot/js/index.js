@@ -1,13 +1,48 @@
+/**
+ * @file Carte interactive avec recherche de points d’intérêt (POI) de la page index
+ * @description
+ * Ce script initialise une carte Leaflet permettant :
+ * - La géolocalisation utilisateur
+ * - La recherche d’un lieu via Nominatim
+ * - L’affichage de points d’intérêt via l’API Overpass (OpenStreetMap)
+ * - Le filtrage par catégorie
+ * - Le réglage du rayon de recherche
+ *
+ * Dépendances :
+ * - Leaflet.js
+ * - API Overpass
+ * - API Nominatim
+ */
+
+/**
+ * Point d'entrée principal exécuté lorsque le DOM est chargé.
+ * @event DOMContentLoaded
+ */
 document.addEventListener("DOMContentLoaded", function () {
+     /** @type {Object} */
     const appConfig = window.appConfig || {};
+     /** @type {number[]} */
     const defaultCoords = [appConfig.defaultLat || 45.767518, appConfig.defaultLon || 4.833534];
 
-    let map, searchLayer, poiLayer;
+    /** @type {L.Map} */
+    let map;
+
+    /** @type {L.LayerGroup} */
+    let searchLayer, poiLayer;
+
+    /** @type {number[]} */
     let currentCoords = defaultCoords;
+
+    /** @type {L.Circle|null} */
     let currentCircle = null;
+
+    /**
+    * Rayon de recherche en mètres.
+    * @type {number}
+    */
     let searchRadius = 2000;
 
-    // Éléments DOM
+   
     const searchInput = document.getElementById('poiSearchIndex');
     const searchResults = document.getElementById('searchResultsIndex');
     const categorySelect = document.getElementById('categorySelect');
@@ -15,7 +50,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const radiusSlider = document.getElementById('radiusSlider');
     const radiusValueSpan = document.getElementById('radiusValue');
 
-    // Configuration des filtres Overpass
+    /* ======================================================
+       Configuration des filtres Overpass
+    ====================================================== */
+
+    /**
+     * @typedef {Object} POIFilter
+     * @property {string} query - Requête Overpass
+     * @property {string} icon - Emoji affiché
+     * @property {string} color - Couleur du marqueur
+     */
+
+    /** @type {Object.<string, POIFilter>} */
     const poiFilters = {
         restaurant: { query: 'node["amenity"="restaurant"](around:{radius},{lat},{lon});', icon: '🍽️', color: '#e74c3c' },
         fast_food: { query: 'node["amenity"="fast_food"](around:{radius},{lat},{lon});', icon: '🍔', color: '#e67e22' },
@@ -34,6 +80,15 @@ document.addEventListener("DOMContentLoaded", function () {
         hospital: { query: 'node["amenity"="hospital"](around:{radius},{lat},{lon});', icon: '🏥', color: '#c0392b' }
     };
 
+    /* ======================================================
+       Initialisation de la carte
+    ====================================================== */
+
+    /**
+     * Initialise la carte Leaflet et configure les événements.
+     * @function initMap
+     * @returns {void}
+     */
     function initMap() {
         if (!document.getElementById('userMap')) return;
 
@@ -59,6 +114,19 @@ document.addEventListener("DOMContentLoaded", function () {
         map.on('click', e => updateSearchPosition(e.latlng.lat, e.latlng.lng));
     }
 
+    /* ======================================================
+       Mise à jour position recherche
+    ====================================================== */
+
+    /**
+     * Met à jour la position de recherche et redessine le cercle.
+     *
+     * @function updateSearchPosition
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     * @param {?number} zoom - Niveau de zoom optionnel
+     * @returns {void}
+     */
     function updateSearchPosition(lat, lng, zoom = null) {
         currentCoords = [lat, lng];
         searchLayer.clearLayers();
@@ -84,6 +152,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (categorySelect.value) loadPOI(categorySelect.value);
     }
 
+    /* ======================================================
+       Chargement des POI via Overpass
+    ====================================================== */
+
+    /**
+     * Charge les points d’intérêt depuis l’API Overpass.
+     *
+     * @async
+     * @function loadPOI
+     * @param {string} filterType - Type de filtre sélectionné
+     * @returns {Promise<void>}
+     */
     async function loadPOI(filterType) {
         poiLayer.clearLayers();
         document.body.style.cursor = 'wait';
@@ -121,6 +201,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    /* ======================================================
+       Création icône personnalisée
+    ====================================================== */
+
+    /**
+     * Crée une icône personnalisée Leaflet.
+     *
+     * @function createCustomIcon
+     * @param {string} emoji - Emoji affiché
+     * @param {string} color - Couleur de fond
+     * @returns {L.DivIcon}
+     */
     function createCustomIcon(emoji, color) {
         return L.divIcon({
             html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 16px;">${emoji}</div>`,
@@ -131,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // --- Écouteurs d'événements ---
+    
 
     if (radiusSlider) {
         radiusSlider.addEventListener('input', function() {
@@ -188,5 +280,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    /* ======================================================
+       Initialisation finale
+    ====================================================== */
     initMap();
 });
