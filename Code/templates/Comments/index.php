@@ -5,10 +5,11 @@ $this->assign('mainClass', 'comments-page');
  * Page affichant la liste des commentaires de l'utilisateur connecté.
  *
  * @var \App\View\AppView $this
- * @var iterable<\App\Model\Entity\Comment> $comments Liste paginée des commentaires
+ * @var iterable<\App\Model\Entity\Comment> $comments
  */
-
 ?>
+
+<h1>Commentaires</h1>
 
 <div class="comments-container">
     <h1 class="page-title">Mes Commentaires</h1>

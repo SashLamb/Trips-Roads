@@ -236,6 +236,7 @@ $mainClass = $this->fetch('mainClass', 'main-index');
 <?= $this->Html->script('https://code.jquery.com/jquery-3.6.0.min.js') ?>
 <?= $this->Html->script('https://code.jquery.com/ui/1.13.3/jquery-ui.min.js') ?>
 
+
 <?php if ($controller === 'Roadtrips' && in_array($action, ['add', 'edit'])): ?>
     <?= $this->Html->script([
         'https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js',

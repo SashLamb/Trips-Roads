@@ -1,54 +1,48 @@
-const defaultCoords = [45.767518, 4.833534];
+/**
+ * @file Carte interactive avec recherche de points d’intérêt (POI) de la page index
+ * @description
+ * Ce script initialise une carte Leaflet permettant :
+ * - La géolocalisation utilisateur
+ * - La recherche d’un lieu via Nominatim
+ * - L’affichage de points d’intérêt via l’API Overpass (OpenStreetMap)
+ * - Le filtrage par catégorie
+ * - Le réglage du rayon de recherche
+ *
+ * Dépendances :
+ * - Leaflet.js
+ * - API Overpass
+ * - API Nominatim
+ */
 
-let map, searchLayer, poiLayer;
-let currentCoords = defaultCoords;
-let currentCircle = null;
-let searchRadius = 2000;
-let currentUserId = null;
-
-const poiFilters = {
-    restaurant: { query: 'node["amenity"="restaurant"](around:{radius},{lat},{lon});', icon: '🍽️', color: '#e74c3c' },
-    fast_food: { query: 'node["amenity"="fast_food"](around:{radius},{lat},{lon});', icon: '🍔', color: '#e67e22' },
-    cafe: { query: 'node["amenity"="cafe"](around:{radius},{lat},{lon});', icon: '☕', color: '#d35400' },
-    bar: { query: 'node["amenity"="bar"](around:{radius},{lat},{lon});node["amenity"="pub"](around:{radius},{lat},{lon});', icon: '🍺', color: '#9b59b6' },
-    hotel: { query: 'node["tourism"="hotel"](around:{radius},{lat},{lon});', icon: '🏨', color: '#3498db' },
-    camping: { query: 'node["tourism"="camp_site"](around:{radius},{lat},{lon});', icon: '🏕️', color: '#27ae60' },
-    fuel: { query: 'node["amenity"="fuel"](around:{radius},{lat},{lon});', icon: '⛽', color: '#f39c12' },
-    parking: { query: 'node["amenity"="parking"](around:{radius},{lat},{lon});', icon: '🅿️', color: '#34495e' },
-    atm: { query: 'node["amenity"="atm"](around:{radius},{lat},{lon});', icon: '🏧', color: '#2ecc71' },
-    pharmacy: { query: 'node["amenity"="pharmacy"](around:{radius},{lat},{lon});', icon: '💊', color: '#c0392b' },
-    attraction: { query: 'node["tourism"="attraction"](around:{radius},{lat},{lon});', icon: '🎭', color: '#1abc9c' },
-    museum: { query: 'node["tourism"="museum"](around:{radius},{lat},{lon});', icon: '🏛️', color: '#8e44ad' },
-    park: { query: 'node["leisure"="park"](around:{radius},{lat},{lon});', icon: '🌳', color: '#27ae60' },
-    supermarket: { query: 'node["shop"="supermarket"](around:{radius},{lat},{lon});', icon: '🛒', color: '#e67e22' },
-    hospital: { query: 'node["amenity"="hospital"](around:{radius},{lat},{lon});', icon: '🏥', color: '#c0392b' }
-};
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('mapSidebar');
-    const icon = document.getElementById('toggleIcon');
-    if (sidebar && icon) {
-        sidebar.classList.toggle('closed');
-        icon.innerHTML = sidebar.classList.contains('closed') ? "▶" : "◀";
-    }
-}
-
-function createCustomIcon(emoji, color) {
-    return L.divIcon({
-        html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 16px;">${emoji}</div>`,
-        className: 'custom-poi-icon',
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -30]
-    });
-}
-
+/**
+ * Point d'entrée principal exécuté lorsque le DOM est chargé.
+ * @event DOMContentLoaded
+ */
 document.addEventListener("DOMContentLoaded", function () {
-    const mapContainer = document.getElementById('mapContainer');
-    if (mapContainer && mapContainer.dataset.userId) {
-        currentUserId = mapContainer.dataset.userId;
-    }
+     /** @type {Object} */
+    const appConfig = window.appConfig || {};
+     /** @type {number[]} */
+    const defaultCoords = [appConfig.defaultLat || 45.767518, appConfig.defaultLon || 4.833534];
 
+    /** @type {L.Map} */
+    let map;
+
+    /** @type {L.LayerGroup} */
+    let searchLayer, poiLayer;
+
+    /** @type {number[]} */
+    let currentCoords = defaultCoords;
+
+    /** @type {L.Circle|null} */
+    let currentCircle = null;
+
+    /**
+    * Rayon de recherche en mètres.
+    * @type {number}
+    */
+    let searchRadius = 2000;
+
+   
     const searchInput = document.getElementById('poiSearchIndex');
     const searchResults = document.getElementById('searchResultsIndex');
     const categorySelect = document.getElementById('categorySelect');
@@ -56,10 +50,49 @@ document.addEventListener("DOMContentLoaded", function () {
     const radiusSlider = document.getElementById('radiusSlider');
     const radiusValueSpan = document.getElementById('radiusValue');
 
-    if (!document.getElementById('userMapIndex')) return;
+    /* ======================================================
+       Configuration des filtres Overpass
+    ====================================================== */
 
+    /**
+     * @typedef {Object} POIFilter
+     * @property {string} query - Requête Overpass
+     * @property {string} icon - Emoji affiché
+     * @property {string} color - Couleur du marqueur
+     */
+
+    /** @type {Object.<string, POIFilter>} */
+    const poiFilters = {
+        restaurant: { query: 'node["amenity"="restaurant"](around:{radius},{lat},{lon});', icon: '🍽️', color: '#e74c3c' },
+        fast_food: { query: 'node["amenity"="fast_food"](around:{radius},{lat},{lon});', icon: '🍔', color: '#e67e22' },
+        cafe: { query: 'node["amenity"="cafe"](around:{radius},{lat},{lon});', icon: '☕', color: '#d35400' },
+        bar: { query: 'node["amenity"="bar"](around:{radius},{lat},{lon});node["amenity"="pub"](around:{radius},{lat},{lon});', icon: '🍺', color: '#9b59b6' },
+        hotel: { query: 'node["tourism"="hotel"](around:{radius},{lat},{lon});', icon: '🏨', color: '#3498db' },
+        camping: { query: 'node["tourism"="camp_site"](around:{radius},{lat},{lon});', icon: '🏕️', color: '#27ae60' },
+        fuel: { query: 'node["amenity"="fuel"](around:{radius},{lat},{lon});', icon: '⛽', color: '#f39c12' },
+        parking: { query: 'node["amenity"="parking"](around:{radius},{lat},{lon});', icon: '🅿️', color: '#34495e' },
+        atm: { query: 'node["amenity"="atm"](around:{radius},{lat},{lon});', icon: '🏧', color: '#2ecc71' },
+        pharmacy: { query: 'node["amenity"="pharmacy"](around:{radius},{lat},{lon});', icon: '💊', color: '#c0392b' },
+        attraction: { query: 'node["tourism"="attraction"](around:{radius},{lat},{lon});', icon: '🎭', color: '#1abc9c' },
+        museum: { query: 'node["tourism"="museum"](around:{radius},{lat},{lon});', icon: '🏛️', color: '#8e44ad' },
+        park: { query: 'node["leisure"="park"](around:{radius},{lat},{lon});', icon: '🌳', color: '#27ae60' },
+        supermarket: { query: 'node["shop"="supermarket"](around:{radius},{lat},{lon});', icon: '🛒', color: '#e67e22' },
+        hospital: { query: 'node["amenity"="hospital"](around:{radius},{lat},{lon});', icon: '🏥', color: '#c0392b' }
+    };
+
+    /* ======================================================
+       Initialisation de la carte
+    ====================================================== */
+
+    /**
+     * Initialise la carte Leaflet et configure les événements.
+     * @function initMap
+     * @returns {void}
+     */
     function initMap() {
-        map = L.map('userMapIndex').setView(currentCoords, 6);
+        if (!document.getElementById('userMap')) return;
+
+        map = L.map('userMap').setView(currentCoords, 6);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap',
@@ -81,6 +114,19 @@ document.addEventListener("DOMContentLoaded", function () {
         map.on('click', e => updateSearchPosition(e.latlng.lat, e.latlng.lng));
     }
 
+    /* ======================================================
+       Mise à jour position recherche
+    ====================================================== */
+
+    /**
+     * Met à jour la position de recherche et redessine le cercle.
+     *
+     * @function updateSearchPosition
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     * @param {?number} zoom - Niveau de zoom optionnel
+     * @returns {void}
+     */
     function updateSearchPosition(lat, lng, zoom = null) {
         currentCoords = [lat, lng];
         searchLayer.clearLayers();
@@ -103,20 +149,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (zoom) map.setView([lat, lng], zoom);
 
-        if (categorySelect && categorySelect.value) {
-            loadPOI(categorySelect.value);
-        }
+        if (categorySelect.value) loadPOI(categorySelect.value);
     }
 
+    /* ======================================================
+       Chargement des POI via Overpass
+    ====================================================== */
+
+    /**
+     * Charge les points d’intérêt depuis l’API Overpass.
+     *
+     * @async
+     * @function loadPOI
+     * @param {string} filterType - Type de filtre sélectionné
+     * @returns {Promise<void>}
+     */
     async function loadPOI(filterType) {
         poiLayer.clearLayers();
         document.body.style.cursor = 'wait';
 
         const filter = poiFilters[filterType];
-        if (!filter) {
-            document.body.style.cursor = 'default';
-            return;
-        }
+        if (!filter) return;
 
         const query = filter.query
             .replace(/{lat}/g, currentCoords[0])
@@ -133,13 +186,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (data.elements.length > 0) {
                 if (clearFilterBtn) clearFilterBtn.style.display = 'block';
-
                 data.elements.forEach(element => {
                     if (element.lat && element.lon) {
                         const icon = createCustomIcon(filter.icon, filter.color);
                         L.marker([element.lat, element.lon], { icon: icon })
-                            .addTo(poiLayer)
-                            .bindPopup(`<b>${filter.icon} ${element.tags.name || 'Sans nom'}</b>`);
+                         .addTo(poiLayer)
+                         .bindPopup(`<b>${filter.icon} ${element.tags.name || 'Sans nom'}</b>`);
                     }
                 });
             }
@@ -148,6 +200,30 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.style.cursor = 'default';
         }
     }
+
+    /* ======================================================
+       Création icône personnalisée
+    ====================================================== */
+
+    /**
+     * Crée une icône personnalisée Leaflet.
+     *
+     * @function createCustomIcon
+     * @param {string} emoji - Emoji affiché
+     * @param {string} color - Couleur de fond
+     * @returns {L.DivIcon}
+     */
+    function createCustomIcon(emoji, color) {
+        return L.divIcon({
+            html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 16px;">${emoji}</div>`,
+            className: 'custom-poi-icon',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+    }
+
+    
 
     if (radiusSlider) {
         radiusSlider.addEventListener('input', function() {
@@ -158,17 +234,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         radiusSlider.addEventListener('change', function() {
-            if (categorySelect && categorySelect.value) {
-                loadPOI(categorySelect.value);
-            }
+            if (categorySelect.value) loadPOI(categorySelect.value);
         });
     }
 
     if (categorySelect) {
         categorySelect.addEventListener('change', function() {
-            if (this.value) {
-                loadPOI(this.value);
-            } else {
+            if (this.value) loadPOI(this.value);
+            else {
                 poiLayer.clearLayers();
                 if (clearFilterBtn) clearFilterBtn.style.display = 'none';
             }
@@ -178,12 +251,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (clearFilterBtn) {
         clearFilterBtn.addEventListener('click', function() {
             poiLayer.clearLayers();
-            if (categorySelect) categorySelect.value = "";
+            categorySelect.value = "";
             this.style.display = 'none';
         });
     }
 
-    if (searchInput && searchResults) {
+    if (searchInput) {
         searchInput.addEventListener('input', function() {
             const query = this.value.trim();
             if (query.length > 2) {
@@ -195,22 +268,20 @@ document.addEventListener("DOMContentLoaded", function () {
                             const li = document.createElement('li');
                             li.textContent = item.display_name;
                             li.style.cssText = 'cursor:pointer; padding:5px; border-bottom:1px solid #eee';
-
                             li.addEventListener('click', () => {
                                 updateSearchPosition(parseFloat(item.lat), parseFloat(item.lon), 14);
                                 searchResults.innerHTML = '';
                                 searchInput.value = '';
                             });
-
                             searchResults.appendChild(li);
                         });
-                    })
-                    .catch(err => console.error(err));
-            } else {
-                searchResults.innerHTML = '';
-            }
+                    });
+            } else { searchResults.innerHTML = ''; }
         });
     }
 
+    /* ======================================================
+       Initialisation finale
+    ====================================================== */
     initMap();
 });

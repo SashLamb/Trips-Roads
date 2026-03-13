@@ -109,6 +109,26 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 <i class="material-icons">visibility</i>
                             </a>
 
+                            <a class="action-btn"
+                               href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportPdf', $rt->id]) ?>"
+                               title="Télécharger en PDF"
+                               target="_blank">
+                                <i class="material-icons">picture_as_pdf</i>
+                            </a>
+
+                            <?php if ($currentUser): ?>
+                                <?php
+                                $isFavorited = in_array($rt->id, $favorisIds);
+                                ?>
+
+                                <a class="action-btn <?= $isFavorited ? 'favorited' : '' ?>"
+                                   href="<?= $this->Url->build(['controller' => 'Favorites', 'action' => $isFavorited ? 'delete' : 'add', $rt->id]) ?>"
+                                   title="<?= $isFavorited ? 'Retirer des favoris' : 'Ajouter aux favoris' ?>"
+                                   style="<?= $isFavorited ? 'color: red;' : '' ?>">
+                                    <i class="material-icons"><?= $isFavorited ? 'favorite' : 'favorite_border' ?></i>
+                                </a>
+                            <?php endif; ?>
+
                             <button type="button"
                                     class="action-btn btn-open-avis"
                                     data-id="<?= $rt->id ?>"
