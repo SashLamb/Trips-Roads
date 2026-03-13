@@ -5,6 +5,8 @@
  * @var \App\Model\Entity\Roadtrip $roadtrip
  */
 $this->assign('title', h($roadtrip->title));
+
+$parsedown = new \Parsedown();
 ?>
 
 <div class="header-rt">
@@ -72,7 +74,7 @@ $this->assign('title', h($roadtrip->title));
 
                     <?php if (!empty($step->description)): ?>
                         <div class="step-desc">
-                            <?= strip_tags($step->description) ?>
+                            <?= $parsedown->text($step->description) ?>
                         </div>
                     <?php endif; ?>
 
