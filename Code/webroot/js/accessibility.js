@@ -1,3 +1,6 @@
+const form = document.getElementById("accessForm");
+
+
 document.addEventListener("DOMContentLoaded", function() {
 
     function appliquerPreferences() {
@@ -10,21 +13,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if (savedTheme === "dark") {
             document.documentElement.classList.add("dark");
-            document.documentElement.classList.add("SombreBtn");
+            document.documentElement.classList.add("sombreBtn");
             if (checkboxSombre) checkboxSombre.checked = true;
         } else {
             document.documentElement.classList.remove("dark");
-            document.documentElement.classList.remove("SombreBtn");
+            document.documentElement.classList.remove("sombreBtn");
             if (checkboxSombre) checkboxSombre.checked = false;
         }
 
         if (savedMalvoyant === "malvoyant") {
             document.documentElement.classList.add("malvoyant");
-            document.documentElement.classList.add("MalvoyantBtn");
+            document.documentElement.classList.add("malvoyantBtn");
             if (checkboxMalvoyant) checkboxMalvoyant.checked = true;
         } else {
             document.documentElement.classList.remove("malvoyant");
-            document.documentElement.classList.remove("MalvoyantBtn");
+            document.documentElement.classList.remove("malvoyantBtn");
             if (checkboxMalvoyant) checkboxMalvoyant.checked = false;
         }
 
@@ -44,7 +47,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     appliquerPreferences();
 
-    const form = document.getElementById("AccessForm");
 
     if (form) {
         form.addEventListener("submit", function(event) {
