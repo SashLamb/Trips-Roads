@@ -1,6 +1,61 @@
 /* ==============================
         Indexx
 ============================== */
+
+.hero-actions {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--beige_fonce);
+}
+
+.hero-content h1 {
+    color: var(--bleu_fonce);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.hero-content p {
+    color: var(--bleu_fonce_ecriture);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 25px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 1rem;
+}
+
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.btn-action.primary {
+    background-color: var(--orange);
+    color: white;
+}
+
+.btn-action.secondary {
+    background-color: var(--bleu_clair);
+    color: white;
+}
+
+
+
 .main-index main {
     padding: 2rem;
     background-color: var(--beige);
@@ -57,12 +112,7 @@
     margin-bottom: 1rem;
 }
 
-#map {
-    height: 400px;
-    width: 100%;
-    border-radius: 8px;
-    z-index: 0;
-}
+
 
 /* ==============================
   CONTENU PRINCIPAL
@@ -300,11 +350,14 @@
     transform: translateY(0);
 }
 
-#userMap {
+#userMapIndex {
     position: relative;
     cursor: crosshair;
+    height: 700px !important;
+    width: 100%;
+    border-radius: 8px;
+    z-index: 0;
 }
-
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -361,7 +414,7 @@ Responsive
         top: 0;
     }
 
-    #userMap {
+    #userMapIndex {
         height: 500px !important;
     }
 }
@@ -376,7 +429,7 @@ Responsive
         z-index: 0;
     }
 
-    #userMap {
+    #userMapIndex {
         height: 400px !important;
     }
 

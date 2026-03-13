@@ -61,7 +61,7 @@
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
 </head>
-<body class="<?= $isAdmin ? 'admin-mode' : '' ?>">
+<body class="<?= $isAdmin ? 'admin-mode' : '' ?>" data-user-id="<?= h($userId ?? '') ?>">
 <?php
 $currentUser = $this->request->getAttribute('identity');
 ?>
@@ -254,6 +254,8 @@ $mainClass = $this->fetch('mainClass', 'main-index');
     <?= $this->Html->script('https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js') ?>
 <?php endif; ?>
 
+<?= $this->Html->script('index', ['block' => true]) ?>
+x
 <?= $this->Html->script([
     'encryption',
     'index',
