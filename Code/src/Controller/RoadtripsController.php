@@ -7,6 +7,8 @@ use Cake\Event\EventInterface;
 use Cake\I18n\FrozenTime;
 use Cake\View\JsonView;
 use Cake\Http\Client;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 /**
  * Roadtrips Controller
@@ -91,9 +93,9 @@ class RoadtripsController extends AppController
 
                 foreach ($favorites as $fav) {
                     $response[] = [
-                        'nom_lieu'  => $fav->nom_lieu ?? $fav->name,
-                        'adresse'   => $fav->adresse ?? '',
-                        'latitude'  => $fav->latitude,
+                        'nom_lieu' => $fav->nom_lieu ?? $fav->name,
+                        'adresse' => $fav->adresse ?? '',
+                        'latitude' => $fav->latitude,
                         'longitude' => $fav->longitude,
                         'categorie' => $fav->categorie ?? 'divers'
                     ];
@@ -519,8 +521,7 @@ class RoadtripsController extends AppController
                 if (!empty($step->duration)) {
                     if (is_object($step->duration) && method_exists($step->duration, 'format')) {
                         $heureFormattee = $step->duration->format('H:i');
-                    }
-                    else {
+                    } else {
                         $heureFormattee = substr((string)$step->duration, 0, 5);
                     }
                 }
@@ -833,13 +834,28 @@ class RoadtripsController extends AppController
         }
 
         $this->viewBuilder()
-            ->setClassName('CakePdf.Pdf')
-            ->setOption('pdfConfig', [
-                'orientation' => 'portrait',
-                'filename' => 'Carnet_de_route_' . preg_replace('/[^a-zA-Z0-9]/', '_', $roadtrip->title) . '.pdf'
-            ]);
+            ->setTemplatePath('Roadtrips')
+            ->setTemplate('export_pdf')
+            ->setLayout('layoutPdf');
 
         $this->set(compact('roadtrip'));
+
+        $view = $this->createView();
+        $html = $view->render();
+
+        $options = new Options();
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $pdfOutput = $dompdf->output();
+        $filename = 'Carnet_de_route_' . preg_replace('/[^a-zA-Z0-9]/', '_', $roadtrip->title) . '.pdf';
+
+        return $this->response
+            ->withType('application/pdf')
+            ->withDownload($filename)
+            ->withStringBody($pdfOutput);
     }
 
 
