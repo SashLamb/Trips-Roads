@@ -857,4 +857,61 @@ class RoadtripsController extends AppController
             ->withDownload($filename)
             ->withStringBody($pdfOutput);
     }
+
+
+    public function exportGpx($id = null)
+    {
+        $roadtrip = $this->Roadtrips->get($id, [
+            'contain' => [
+                'Trips' => [
+                    'sort' => ['Trips.order_number' => 'ASC'],
+                    'SubSteps' => [
+                        'sort' => ['SubSteps.order_number' => 'ASC']
+                    ]
+                ]
+            ]
+        ]);
+
+        $geocodedPlacesTable = \Cake\ORM\TableRegistry::getTableLocator()->get('GeocodedPlaces');
+
+        $xmlString = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>' .
+            '<gpx version="1.1" creator="TripsAndRoads" xmlns="http://www.topografix.com/GPX/1/1"></gpx>';
+        $xml = new \SimpleXMLElement($xmlString);
+
+        $metadata = $xml->addChild('metadata');
+        $metadata->addChild('name', h($roadtrip->title));
+
+        foreach ($roadtrip->trips as $trip) {
+            foreach ($trip->sub_steps as $step) {
+                if (empty($step->city)) {
+                    continue;
+                }
+                $place = $geocodedPlacesTable->find()
+                    ->where(['name' => $step->city])
+                    ->first();
+
+                if ($place) {
+                    $wpt = $xml->addChild('wpt');
+                    $wpt->addAttribute('lat', (string)$place->latitude);
+                    $wpt->addAttribute('lon', (string)$place->longitude);
+
+                    $wpt->addChild('name', h($step->city));
+
+                    if (!empty($step->description)) {
+                        $wpt->addChild('desc', h($step->description));
+                    }
+
+                    $wpt->addChild('ele', '0');
+                }
+            }
+        }
+
+        $nomFichier = preg_replace('/[^a-zA-Z0-9]/', '_', $roadtrip->title) . '.gpx';
+
+        return $this->response
+            ->withType('application/gpx+xml')
+            ->withDownload($nomFichier)
+            ->withStringBody($xml->asXML());
+    }
+
 }

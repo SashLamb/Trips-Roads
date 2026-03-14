@@ -17,9 +17,13 @@ class FavoritesController extends AppController
      */
     public function index()
     {
+        $userId = $this->Authentication->getIdentity()->getIdentifier();
+
         $query = $this->Favorites->find()
-            ->contain(['Users', 'Roadtrips']);
-        $favorites = $this->paginate($query);
+            ->where(['Favorites.user_id' => $userId])
+            ->contain(['Roadtrips','Roadtrips.Users', 'Roadtrips.Comments']);
+
+        $favorites = $query->all();
 
         $this->set(compact('favorites'));
     }
@@ -44,19 +48,27 @@ class FavoritesController extends AppController
      */
     public function add()
     {
-        $favorite = $this->Favorites->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $favorite = $this->Favorites->patchEntity($favorite, $this->request->getData());
-            if ($this->Favorites->save($favorite)) {
-                $this->Flash->success(__('The favorite has been saved.'));
+        $this->request->allowMethod(['post']);
 
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The favorite could not be saved. Please, try again.'));
+        $favorite = $this->Favorites->newEmptyEntity();
+
+        $data = $this->request->getData();
+
+        if (empty($data['roadtrip_id'])) {
+            $data['roadtrip_id'] = $this->request->getQuery('roadtrip_id');
         }
-        $users = $this->Favorites->Users->find('list', limit: 200)->all();
-        $roadtrips = $this->Favorites->Roadtrips->find('list', limit: 200)->all();
-        $this->set(compact('favorite', 'users', 'roadtrips'));
+
+        $data['user_id'] = $this->Authentication->getIdentity()->getIdentifier();
+
+        $favorite = $this->Favorites->patchEntity($favorite, $data);
+
+        if ($this->Favorites->save($favorite)) {
+            $this->Flash->success(__('Ajouté aux favoris !'));
+        } else {
+            $this->Flash->error(__('Erreur lors de l\'ajout.'));
+        }
+
+        return $this->redirect($this->referer());
     }
 
     /**
