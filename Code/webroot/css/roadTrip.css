@@ -60,30 +60,14 @@
 /* ==============================
    SECTION 2 : ROAD TRIPS (VITRINE)
 ============================== */
-.featured-section {
-    padding: 20px 40px 40px 40px;
-    margin: 0 auto;
-    background-color: var(--beige_fonce);
-}
 
-.featured-section h2 {
-    text-align: center;
-    color: var(--beige);
-    margin-bottom: 30px;
-    position: relative;
-    display: inline-block;
-    left: 50%;
-    transform: translateX(-50%);
-}
 
-/* Grille Responsive */
 .roadtrips-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 25px;
 }
 
-/* Style des cartes miniatures */
 .mini-card {
     background: white;
     border-radius: 12px;
@@ -129,12 +113,7 @@
 /* ==============================
    SECTION 3 : MAP FULL WIDTH & SIDEBAR
 ============================== */
-.full-map-container {
-    position: relative;
-    width: 100%;
-    min-height: 500px;
-    overflow: hidden;
-}
+
 
 #userMap {
     width: 100%;
@@ -778,9 +757,6 @@
         margin-bottom: 30px;
     }
 
-    .full-map-container {
-        height: 60vh;
-    }
     .map-sidebar {
         width: 280px;
         transform: translateX(-300px);

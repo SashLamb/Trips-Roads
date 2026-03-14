@@ -258,13 +258,11 @@ $mainClass = $this->fetch('mainClass', 'main-index');
 <?= $this->Html->script('index', ['block' => true]) ?>
 x
 <?= $this->Html->script([
-    'encryption',
     'index',
     'map',
     'messagerie',
     'modal',
     'profil',
-    'recherche',
     'viewRoadtrip',
     'accessibility',
 ]) ?>

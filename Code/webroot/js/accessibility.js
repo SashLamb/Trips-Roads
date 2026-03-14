@@ -5,7 +5,7 @@
  * - Thème sombre / clair
  * - Mode malvoyant (taille/contraste adapté)
  * - Filtres pour différents types de daltonisme
- * 
+ *
  * Les préférences sont sauvegardées dans le localStorage
  * et réappliquées automatiquement au chargement de la page.
  */

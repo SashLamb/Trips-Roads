@@ -5,44 +5,102 @@
  * - La géolocalisation utilisateur
  * - La recherche d’un lieu via Nominatim
  * - L’affichage de points d’intérêt via l’API Overpass (OpenStreetMap)
- * - Le filtrage par catégorie
- * - Le réglage du rayon de recherche
- *
- * Dépendances :
- * - Leaflet.js
- * - API Overpass
- * - API Nominatim
+ * - Le filtrage par catégorie et réglage du rayon
+ * * Dépendances : Leaflet.js, API Overpass, API Nominatim
  */
+
+/* ======================================================
+    CONFIGURATION ET VARIABLES GLOBALES
+====================================================== */
+
+/** @type {Object} */
+const appConfig = window.appConfig || {};
+
+/** @type {number[]} Coordonnées par défaut (Lyon par exemple) */
+const defaultCoords = [appConfig.defaultLat || 45.767518, appConfig.defaultLon || 4.833534];
+
+/** @type {L.Map} Instance de la carte Leaflet */
+let map;
+
+/** @type {L.LayerGroup} Calques pour les marqueurs */
+let searchLayer, poiLayer;
+
+/** @type {number[]} Position actuelle de recherche */
+let currentCoords = defaultCoords;
+
+/** @type {L.Circle|null} Cercle visualisant le rayon de recherche */
+let currentCircle = null;
+
+/** @type {number} Rayon de recherche en mètres */
+let searchRadius = 2000;
 
 /**
- * Point d'entrée principal exécuté lorsque le DOM est chargé.
- * @event DOMContentLoaded
+ * Configuration des filtres Overpass
+ * @typedef {Object} POIFilter
+ * @property {string} query - Requête Overpass
+ * @property {string} icon - Emoji affiché
+ * @property {string} color - Couleur du marqueur
  */
+
+/** @type {Object.<string, POIFilter>} */
+const poiFilters = {
+    restaurant: { query: 'node["amenity"="restaurant"](around:{radius},{lat},{lon});', icon: '🍽️', color: '#e74c3c' },
+    fast_food: { query: 'node["amenity"="fast_food"](around:{radius},{lat},{lon});', icon: '🍔', color: '#e67e22' },
+    cafe: { query: 'node["amenity"="cafe"](around:{radius},{lat},{lon});', icon: '☕', color: '#d35400' },
+    bar: { query: 'node["amenity"="bar"](around:{radius},{lat},{lon});node["amenity"="pub"](around:{radius},{lat},{lon});', icon: '🍺', color: '#9b59b6' },
+    hotel: { query: 'node["tourism"="hotel"](around:{radius},{lat},{lon});', icon: '🏨', color: '#3498db' },
+    camping: { query: 'node["tourism"="camp_site"](around:{radius},{lat},{lon});', icon: '🏕️', color: '#27ae60' },
+    fuel: { query: 'node["amenity"="fuel"](around:{radius},{lat},{lon});', icon: '⛽', color: '#f39c12' },
+    parking: { query: 'node["amenity"="parking"](around:{radius},{lat},{lon});', icon: '🅿️', color: '#34495e' },
+    attraction: { query: 'node["tourism"="attraction"](around:{radius},{lat},{lon});', icon: '🎭', color: '#1abc9c' },
+    museum: { query: 'node["tourism"="museum"](around:{radius},{lat},{lon});', icon: '🏛️', color: '#8e44ad' },
+    park: { query: 'node["leisure"="park"](around:{radius},{lat},{lon});', icon: '🌳', color: '#27ae60' },
+    hospital: { query: 'node["amenity"="hospital"](around:{radius},{lat},{lon});', icon: '🏥', color: '#c0392b' }
+};
+
+/* ======================================================
+   FONCTIONS GLOBALES
+   ====================================================== */
+
+/**
+ * Gère l'ouverture/fermeture de la barre latérale des filtres.
+ * @function toggleSidebar
+ */
+function toggleSidebar() {
+    const sidebar = document.getElementById('mapSidebar');
+    const icon = document.getElementById('toggleIcon');
+    if (sidebar) {
+        sidebar.classList.toggle('closed');
+        if (icon) {
+            icon.innerHTML = sidebar.classList.contains('closed') ? "▶" : "◀";
+        }
+        if (map) {
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        }
+    }
+}
+
+/**
+ * Crée une icône personnalisée Leaflet avec un emoji.
+ * @param {string} emoji
+ * @param {string} color
+ * @returns {L.DivIcon}
+ */
+function createCustomIcon(emoji, color) {
+    return L.divIcon({
+        html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 16px;">${emoji}</div>`,
+        className: 'custom-poi-icon',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30]
+    });
+}
+
+/* ======================================================
+   3. INITIALISATION ET LOGIQUE DOM
+   ====================================================== */
+
 document.addEventListener("DOMContentLoaded", function () {
-     /** @type {Object} */
-    const appConfig = window.appConfig || {};
-     /** @type {number[]} */
-    const defaultCoords = [appConfig.defaultLat || 45.767518, appConfig.defaultLon || 4.833534];
-
-    /** @type {L.Map} */
-    let map;
-
-    /** @type {L.LayerGroup} */
-    let searchLayer, poiLayer;
-
-    /** @type {number[]} */
-    let currentCoords = defaultCoords;
-
-    /** @type {L.Circle|null} */
-    let currentCircle = null;
-
-    /**
-    * Rayon de recherche en mètres.
-    * @type {number}
-    */
-    let searchRadius = 2000;
-
-   
     const searchInput = document.getElementById('poiSearchIndex');
     const searchResults = document.getElementById('searchResultsIndex');
     const categorySelect = document.getElementById('categorySelect');
@@ -50,49 +108,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const radiusSlider = document.getElementById('radiusSlider');
     const radiusValueSpan = document.getElementById('radiusValue');
 
-    /* ======================================================
-       Configuration des filtres Overpass
-    ====================================================== */
+    if (!document.getElementById('userMapIndex')) return;
 
     /**
-     * @typedef {Object} POIFilter
-     * @property {string} query - Requête Overpass
-     * @property {string} icon - Emoji affiché
-     * @property {string} color - Couleur du marqueur
-     */
-
-    /** @type {Object.<string, POIFilter>} */
-    const poiFilters = {
-        restaurant: { query: 'node["amenity"="restaurant"](around:{radius},{lat},{lon});', icon: '🍽️', color: '#e74c3c' },
-        fast_food: { query: 'node["amenity"="fast_food"](around:{radius},{lat},{lon});', icon: '🍔', color: '#e67e22' },
-        cafe: { query: 'node["amenity"="cafe"](around:{radius},{lat},{lon});', icon: '☕', color: '#d35400' },
-        bar: { query: 'node["amenity"="bar"](around:{radius},{lat},{lon});node["amenity"="pub"](around:{radius},{lat},{lon});', icon: '🍺', color: '#9b59b6' },
-        hotel: { query: 'node["tourism"="hotel"](around:{radius},{lat},{lon});', icon: '🏨', color: '#3498db' },
-        camping: { query: 'node["tourism"="camp_site"](around:{radius},{lat},{lon});', icon: '🏕️', color: '#27ae60' },
-        fuel: { query: 'node["amenity"="fuel"](around:{radius},{lat},{lon});', icon: '⛽', color: '#f39c12' },
-        parking: { query: 'node["amenity"="parking"](around:{radius},{lat},{lon});', icon: '🅿️', color: '#34495e' },
-        atm: { query: 'node["amenity"="atm"](around:{radius},{lat},{lon});', icon: '🏧', color: '#2ecc71' },
-        pharmacy: { query: 'node["amenity"="pharmacy"](around:{radius},{lat},{lon});', icon: '💊', color: '#c0392b' },
-        attraction: { query: 'node["tourism"="attraction"](around:{radius},{lat},{lon});', icon: '🎭', color: '#1abc9c' },
-        museum: { query: 'node["tourism"="museum"](around:{radius},{lat},{lon});', icon: '🏛️', color: '#8e44ad' },
-        park: { query: 'node["leisure"="park"](around:{radius},{lat},{lon});', icon: '🌳', color: '#27ae60' },
-        supermarket: { query: 'node["shop"="supermarket"](around:{radius},{lat},{lon});', icon: '🛒', color: '#e67e22' },
-        hospital: { query: 'node["amenity"="hospital"](around:{radius},{lat},{lon});', icon: '🏥', color: '#c0392b' }
-    };
-
-    /* ======================================================
-       Initialisation de la carte
-    ====================================================== */
-
-    /**
-     * Initialise la carte Leaflet et configure les événements.
-     * @function initMap
-     * @returns {void}
+     * Initialise la carte et les calques.
      */
     function initMap() {
-        if (!document.getElementById('userMap')) return;
-
-        map = L.map('userMap').setView(currentCoords, 6);
+        map = L.map('userMapIndex').setView(currentCoords, 6);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap',
@@ -112,20 +134,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         map.on('click', e => updateSearchPosition(e.latlng.lat, e.latlng.lng));
+
+        // Correctif pour les problèmes d'affichage de tuiles au chargement
+        setTimeout(() => { map.invalidateSize(); }, 200);
     }
 
-    /* ======================================================
-       Mise à jour position recherche
-    ====================================================== */
-
     /**
-     * Met à jour la position de recherche et redessine le cercle.
-     *
-     * @function updateSearchPosition
-     * @param {number} lat - Latitude
-     * @param {number} lng - Longitude
-     * @param {?number} zoom - Niveau de zoom optionnel
-     * @returns {void}
+     * Met à jour la position du marqueur central et du cercle de rayon.
      */
     function updateSearchPosition(lat, lng, zoom = null) {
         currentCoords = [lat, lng];
@@ -138,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
             iconAnchor: [15, 20]
         });
 
-        L.marker([lat, lng], { icon: userIcon }).addTo(searchLayer)
+        L.marker([lat, lng], { icon: userIcon }).addTo(searchLayer);
 
         currentCircle = L.circle([lat, lng], {
             color: '#3498db',
@@ -148,28 +163,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }).addTo(searchLayer);
 
         if (zoom) map.setView([lat, lng], zoom);
-
-        if (categorySelect.value) loadPOI(categorySelect.value);
+        if (categorySelect && categorySelect.value) loadPOI(categorySelect.value);
     }
 
-    /* ======================================================
-       Chargement des POI via Overpass
-    ====================================================== */
-
     /**
-     * Charge les points d’intérêt depuis l’API Overpass.
-     *
-     * @async
-     * @function loadPOI
-     * @param {string} filterType - Type de filtre sélectionné
-     * @returns {Promise<void>}
+     * Appelle l'API Overpass pour charger les POI selon la catégorie.
      */
     async function loadPOI(filterType) {
         poiLayer.clearLayers();
         document.body.style.cursor = 'wait';
 
         const filter = poiFilters[filterType];
-        if (!filter) return;
+        if (!filter) {
+            document.body.style.cursor = 'default';
+            return;
+        }
 
         const query = filter.query
             .replace(/{lat}/g, currentCoords[0])
@@ -190,40 +198,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (element.lat && element.lon) {
                         const icon = createCustomIcon(filter.icon, filter.color);
                         L.marker([element.lat, element.lon], { icon: icon })
-                         .addTo(poiLayer)
-                         .bindPopup(`<b>${filter.icon} ${element.tags.name || 'Sans nom'}</b>`);
+                            .addTo(poiLayer)
+                            .bindPopup(`<b>${filter.icon} ${element.tags.name || 'Sans nom'}</b>`);
                     }
                 });
             }
         } catch (error) {
-            console.error(error);
+            console.error("Erreur Overpass :", error);
             document.body.style.cursor = 'default';
         }
     }
 
-    /* ======================================================
-       Création icône personnalisée
-    ====================================================== */
-
-    /**
-     * Crée une icône personnalisée Leaflet.
-     *
-     * @function createCustomIcon
-     * @param {string} emoji - Emoji affiché
-     * @param {string} color - Couleur de fond
-     * @returns {L.DivIcon}
-     */
-    function createCustomIcon(emoji, color) {
-        return L.divIcon({
-            html: `<div style="background-color: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); font-size: 16px;">${emoji}</div>`,
-            className: 'custom-poi-icon',
-            iconSize: [30, 30],
-            iconAnchor: [15, 30],
-            popupAnchor: [0, -30]
-        });
-    }
-
-    
 
     if (radiusSlider) {
         radiusSlider.addEventListener('input', function() {
@@ -234,9 +219,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         radiusSlider.addEventListener('change', function() {
-            if (categorySelect.value) loadPOI(categorySelect.value);
+            if (categorySelect && categorySelect.value) loadPOI(categorySelect.value);
         });
     }
+
 
     if (categorySelect) {
         categorySelect.addEventListener('change', function() {
@@ -248,10 +234,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
     if (clearFilterBtn) {
         clearFilterBtn.addEventListener('click', function() {
             poiLayer.clearLayers();
-            categorySelect.value = "";
+            if (categorySelect) categorySelect.value = "";
             this.style.display = 'none';
         });
     }
@@ -267,7 +254,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         data.forEach(item => {
                             const li = document.createElement('li');
                             li.textContent = item.display_name;
-                            li.style.cssText = 'cursor:pointer; padding:5px; border-bottom:1px solid #eee';
                             li.addEventListener('click', () => {
                                 updateSearchPosition(parseFloat(item.lat), parseFloat(item.lon), 14);
                                 searchResults.innerHTML = '';
@@ -280,8 +266,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    /* ======================================================
-       Initialisation finale
-    ====================================================== */
+
     initMap();
 });
