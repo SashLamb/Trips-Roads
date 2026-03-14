@@ -212,7 +212,7 @@
 
 .sidebar-toggle #toggleIcon {
     position: relative;
-    left: 25px;
+    right: 8px;
 }
 
 .sidebar-toggle:hover {

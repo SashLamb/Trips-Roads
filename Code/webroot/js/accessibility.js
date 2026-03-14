@@ -12,30 +12,15 @@
 
 /**
  * Applique les préférences enregistrées dans le localStorage.
- *
- * Cette fonction :
- * - Récupère les paramètres sauvegardés
- * - Met à jour les classes CSS du document
- * - Synchronise l’état des champs du formulaire
- *
  * @function appliquerPreferences
  * @returns {void}
  */
 function appliquerPreferences() {
-
-    /** @type {string|null} */
     const savedTheme = localStorage.getItem("theme");
-
-    /** @type {string|null} */
     const savedMalvoyant = localStorage.getItem("Police");
-
-    /** @type {string|null} */
     const savedDaltonienType = localStorage.getItem("typeDaltonien");
 
-    /** @type {HTMLInputElement|null} */
     const checkboxSombre = document.getElementById("checkboxSombre");
-
-    /** @type {HTMLInputElement|null} */
     const checkboxMalvoyant = document.getElementById("checkboxMalvoyant");
 
     /* =========================
@@ -63,8 +48,6 @@ function appliquerPreferences() {
     /* =========================
        Gestion du daltonisme
     ========================== */
-
-    // Supprime toutes les classes existantes
     document.documentElement.classList.remove(
         "daltonien",
         "protanopia",
@@ -73,46 +56,27 @@ function appliquerPreferences() {
     );
 
     if (savedDaltonienType && savedDaltonienType !== "aucun") {
-
         document.documentElement.classList.add("daltonien", savedDaltonienType);
-
-        /** @type {HTMLInputElement|null} */
-        const radioToCheck = document.querySelector(
-            `input[name="daltonism-type"][value="${savedDaltonienType}"]`
-        );
-
+        const radioToCheck = document.querySelector(`input[name="daltonism-type"][value="${savedDaltonienType}"]`);
         if (radioToCheck) radioToCheck.checked = true;
-
     } else {
-
-        /** @type {HTMLInputElement|null} */
-        const radioAucun = document.querySelector(
-            'input[name="daltonism-type"][value="aucun"]'
-        );
-
+        const radioAucun = document.querySelector('input[name="daltonism-type"][value="aucun"]');
         if (radioAucun) radioAucun.checked = true;
     }
 }
 
 /**
  * Enregistre les préférences utilisateur lors de la soumission du formulaire.
- *
  * @function enregistrerPreferences
  * @param {SubmitEvent} event - Événement déclenché lors de la soumission
  * @returns {void}
  */
 function enregistrerPreferences(event) {
 
-    /** @type {HTMLInputElement|null} */
+
     const checkboxSombre = document.getElementById("checkboxSombre");
-
-    /** @type {HTMLInputElement|null} */
     const checkboxMalvoyant = document.getElementById("checkboxMalvoyant");
-
-    /** @type {HTMLInputElement|null} */
-    const radioDaltonien = document.querySelector(
-        'input[name="daltonism-type"]:checked'
-    );
+    const radioDaltonien = document.querySelector('input[name="daltonism-type"]:checked');
 
     /* =========================
        Sauvegarde du thème
@@ -140,22 +104,23 @@ function enregistrerPreferences(event) {
     } else {
         localStorage.removeItem("typeDaltonien");
     }
+
+    appliquerPreferences();
 }
 
 /**
  * Initialise le script lorsque le DOM est entièrement chargé.
- *
  * @event DOMContentLoaded
  */
 document.addEventListener("DOMContentLoaded", () => {
-
-    // Application immédiate des préférences sauvegardées
     appliquerPreferences();
 
-    /** @type {HTMLFormElement|null} */
-    const form = document.getElementById("AccessForm");
+    const form = document.getElementById("accessForm");
 
     if (form) {
-        form.addEventListener("submit", enregistrerPreferences);
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            enregistrerPreferences(event);
+        });
     }
 });
