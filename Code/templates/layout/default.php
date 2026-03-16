@@ -69,13 +69,6 @@ $currentUser = $this->request->getAttribute('identity');
 <header>
     <nav>
         <ul>
-            <li class="nav-item">
-                <div class="bar_rech">
-                    <input type="search" id="searchInput" class="search-input" placeholder="Recherche..." autocomplete="off">
-                    <div class="btn"><i class="fas fa-search"></i></div>
-                </div>
-            </li>
-
             <li class="title" id="link_Titre">
                 <?= $this->Html->link('Trips & Roads', '/') ?>
             </li>
