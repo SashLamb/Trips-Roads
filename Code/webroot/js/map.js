@@ -11,12 +11,14 @@ const REGIONS_CONFIG = {
     'europe': {
         center: [46.5, 2.5],
         zoom: 5,
-        codes: ["fr", "be", "ch", "lu", "de", "at", "li", "it", "sm", "va", "es", "pt", "ad", "gb", "ie", "nl", "dk", "no", "se", "fi", "is", "pl", "cz", "sk", "hu", "ee", "lv", "lt", "ro", "bg", "gr", "cy", "mt", "si", "hr", "ba", "rs", "me", "al", "mk", "xk", "ua", "md", "by", "ge", "am", "az"]
+        codes: ["fr", "be", "ch", "lu", "de", "at", "li", "it", "sm", "va", "es", "pt", "ad", "gb", "ie", "nl", "dk", "no", "se", "fi", "is", "pl", "cz", "sk", "hu", "ee", "lv", "lt", "ro", "bg", "gr", "cy", "mt", "si", "hr", "ba", "rs", "me", "al", "mk", "xk", "ua", "md", "by", "ge", "am", "az"],
+        bbox: [-25, 34, 45, 72]
     },
     'america': {
         center: [39.8283, -98.5795],
         zoom: 4,
-        codes: ["us", "ca", "mx"]
+        codes: ["us", "ca", "mx"],
+        bbox: [-169, 15, -52, 72]
     }
 };
 
@@ -167,19 +169,17 @@ function initMap() {
 // 5. GÉOCODAGE & MARQUEURS
 // ============================================================
 
-async function getCoordonnees(ville) {
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(ville)}&limit=1`;
+async function getCoordinate(ville) {
+    const codes = REGIONS_CONFIG[state.currentRegion].codes.join(',');
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(ville)}&limit=1&accept-language=fr&countrycodes=${codes}`;
     try {
-        const resp = await fetch(url);
+        const resp = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
         if (!resp.ok) return null;
         const data = await resp.json();
-        if (data.features && data.features.length > 0) {
-            const coords = data.features[0].geometry.coordinates;
-            return [parseFloat(coords[1]), parseFloat(coords[0])];
-        }
-        return null;
+        if (!data.length) return null;
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
     } catch (e) {
-        console.error("Erreur de géocodage:", e);
+        console.error(e);
         return null;
     }
 }
@@ -202,47 +202,49 @@ function initAutocomplete(element) {
     });
 
     $(element).autocomplete({
-        source: function (request, response) {
-            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(request.term)}&lang=fr&limit=15`;
-            $.ajax({
-                url,
-                method: "GET",
-                success: function (data) {
-                    const allowedCodes = REGIONS_CONFIG[state.currentRegion].codes.map(c => c.toUpperCase());
-                    const suggestions = [];
-                    const seen = new Set();
+        source: async function (request, response) {
+            const codes = REGIONS_CONFIG[state.currentRegion].codes.join(',');
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(request.term)}&limit=8&accept-language=fr&countrycodes=${codes}&addressdetails=1`;
 
-                    data.features.forEach(item => {
-                        const p = item.properties;
-                        const countryCode = p.countrycode ? p.countrycode.toUpperCase() : "";
-                        if (!allowedCodes.includes(countryCode)) return;
+            try {
+                const res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+                const data = await res.json();
 
-                        const name     = p.name || "";
-                        const city     = p.city || p.town || "";
-                        const postcode = p.postcode || "";
-                        const country  = p.country || "";
-                        const uniqueKey = `${name}-${city}-${postcode}-${country}`.toLowerCase();
+                const seen = new Set();
+                const suggestions = [];
 
-                        if (!seen.has(uniqueKey) && suggestions.length < 8) {
-                            seen.add(uniqueKey);
-                            const fullLabel = [name, city, postcode, country].filter(Boolean).join(", ");
-                            suggestions.push({
-                                label: `<div class="ui-menu-item-content">
-                                            <span class="ui-menu-item-name">${name}</span>
-                                            <span class="ui-menu-item-details">${fullLabel}</span>
-                                        </div>`,
-                                value: fullLabel,
-                                full_name: fullLabel,
-                                lat: item.geometry.coordinates[1],
-                                lon: item.geometry.coordinates[0]
-                            });
-                        }
-                    });
-                    response(suggestions);
-                }
-            });
+                data.forEach(item => {
+                    const addr    = item.address || {};
+                    const name    = addr.city || addr.town || addr.village || addr.municipality || item.display_name.split(',')[0] || "";
+                    const state   = addr.state || "";
+                    const country = addr.country || "";
+                    const postcode = addr.postcode || "";
+
+                    const uniqueKey = `${name}-${state}-${country}`.toLowerCase();
+
+                    if (!seen.has(uniqueKey)) {
+                        seen.add(uniqueKey);
+                        const fullLabel = [name, state, postcode, country].filter(Boolean).join(", ");
+                        suggestions.push({
+                            label: `<div class="ui-menu-item-content">
+                                        <span class="ui-menu-item-name" style="font-weight: bold;">${name}</span>
+                                        <span class="ui-menu-item-details" style="font-size: 0.85em; color: #666; margin-left: 5px;">${fullLabel}</span>
+                                    </div>`,
+                            value: fullLabel,
+                            full_name: fullLabel,
+                            lat: parseFloat(item.lat),
+                            lon: parseFloat(item.lon)
+                        });
+                    }
+                });
+
+                response(suggestions);
+            } catch (error) {
+                console.error(error);
+                response([]);
+            }
         },
-        minLength: 3,
+        minLength: 2,
         select: function (event, ui) {
             $(this).val(ui.item.full_name);
             $(this).attr('data-full-name', ui.item.full_name);
@@ -791,7 +793,7 @@ async function validateNewSegment() {
         const lat  = inputStartEl.getAttribute('data-lat');
         const lon  = inputStartEl.getAttribute('data-lon');
         startName  = inputStartEl.value.trim();
-        startCoords = (lat && lon) ? [parseFloat(lat), parseFloat(lon)] : await getCoordonnees(startName);
+        startCoords = (lat && lon) ? [parseFloat(lat), parseFloat(lon)] : await getCoordinate(startName);
 
         if (!startCoords) {
             alert('Départ introuvable');
@@ -808,7 +810,7 @@ async function validateNewSegment() {
     const eLat = inputEndEl.getAttribute('data-lat');
     const eLon = inputEndEl.getAttribute('data-lon');
     const endName   = inputEndEl.value.trim();
-    const endCoords = (eLat && eLon) ? [parseFloat(eLat), parseFloat(eLon)] : await getCoordonnees(endName);
+    const endCoords = (eLat && eLon) ? [parseFloat(eLat), parseFloat(eLon)] : await getCoordinate(endName);
 
     if (!endCoords) {
         alert('Arrivée introuvable');
@@ -1036,18 +1038,18 @@ async function loadExistingRoadTrip() {
 
         const startCoords = (t.departLat && t.departLon)
             ? [parseFloat(t.departLat), parseFloat(t.departLon)]
-            : await getCoordonnees(t.depart);
+            : await getCoordinate(t.depart);
 
         const endCoords = (t.arriveeLat && t.arriveeLon)
             ? [parseFloat(t.arriveeLat), parseFloat(t.arriveeLon)]
-            : await getCoordonnees(t.arrivee);
+            : await getCoordinate(t.arrivee);
 
         let sousEtapesWithCoords = [];
         if (t.sousEtapes && t.sousEtapes.length > 0) {
             for (const se of t.sousEtapes) {
                 const c = (se.lat && se.lon)
                     ? [parseFloat(se.lat), parseFloat(se.lon)]
-                    : await getCoordonnees(se.nom);
+                    : await getCoordinate(se.nom);
                 if (c) {
                     sousEtapesWithCoords.push({ ...se, coords: c });
                     addMarker(se.nom, c, "sous_etape", `<b>${se.nom}</b><br>${se.heure}`);
@@ -1155,7 +1157,7 @@ function bindEvents() {
 
             const latAttr = inputNom.getAttribute('data-lat');
             const lonAttr = inputNom.getAttribute('data-lon');
-            const coords  = (latAttr && lonAttr) ? [parseFloat(latAttr), parseFloat(lonAttr)] : await getCoordonnees(nom);
+            const coords  = (latAttr && lonAttr) ? [parseFloat(latAttr), parseFloat(lonAttr)] : await getCoordinate(nom);
 
             if (coords) {
                 newSubs.push({ nom, heure, remarque, coords, lat: coords[0], lon: coords[1] });
@@ -1188,10 +1190,11 @@ async function init() {
     loadMapFavorites();
 
     state.currentStartCity = (typeof USER_DEFAULT_CITY !== 'undefined') ? USER_DEFAULT_CITY : "";
+
     if (typeof MODE_EDITION !== 'undefined' && MODE_EDITION === true && typeof EXISTING_TRAJETS !== 'undefined') {
         await loadExistingRoadTrip();
     } else if (state.currentStartCity) {
-        const coords = await getCoordonnees(state.currentStartCity);
+        const coords = await getCoordinate(state.currentStartCity);
         if (coords) {
             state.currentStartCoords = coords;
             addMarker(state.currentStartCity, coords, "ville", `Départ : ${state.currentStartCity}`);
