@@ -31,10 +31,21 @@ $this->assign('mainClass', 'comment-view-page');
 
             <div class="meta-infos-grid">
                 <div class="info-box">
-                    <i class="material-icons">account_circle</i>
+                    <?php
+                    // On récupère l'utilisateur depuis l'entité $comment
+                    $user = $comment->user;
+                    ?>
+
+                    <?php if (!empty($comment->user->profile_picture)): ?>
+                        <img src="<?= $this->Url->build('/uploads/pp/' . h($comment->user->profile_picture)) ?>" class="ami-photo">                    <?php else: ?>
+                        <div class="ami-placeholder">
+                            <?= strtoupper(substr($user->first_name ?? 'A', 0, 1)) ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="info-text">
                         <span class="info-label">Auteur</span>
-                        <span class="info-value"><?= h($comment->user->username ?? 'Anonyme') ?></span>
+                        <span class="info-value"><?= h($user->username ?? 'Anonyme') ?></span>
                     </div>
                 </div>
 
