@@ -1,11 +1,11 @@
 /**
- * @file Optimisation de la gestion du profil utilisateur
- * @description Fonctions de prévisualisation d'image et validation de formulaire.
+ * @file User profile management optimization
+ * @description Handles image previewing, profile sidebar toggling, and form validation.
  */
 
 /**
- * Gère l'affichage de la barre latérale sur mobile.
- * Placée hors du DOMContentLoaded pour être accessible via onclick.
+ * Toggles the visibility of the profile sidebar on mobile devices.
+ * Accessible globally via onclick attributes.
  * @function toggleSidebar
  */
 function toggleSidebar() {
@@ -14,10 +14,10 @@ function toggleSidebar() {
 }
 
 /**
- * Prépare l'aperçu de l'image de profil.
+ * Generates a preview of the selected profile image.
  * @function previewImage
- * @param {HTMLInputElement} input - L'élément input type file
- * @param {HTMLElement} previewElement - L'élément qui recevra l'image de fond
+ * @param {HTMLInputElement} input - The file input element
+ * @param {HTMLElement} previewElement - The element where the background image will be applied
  */
 function previewImage(input, previewElement) {
     const file = input.files[0];
@@ -30,9 +30,7 @@ function previewImage(input, previewElement) {
     }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-
     const profilForm = document.getElementById('profilForm');
     const fileInput = document.getElementById('image');
     const avatarPreview = document.querySelector('.avatar-circle.large');
@@ -40,21 +38,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmField = document.getElementById('confirm-password');
 
     /**
-     * Listener pour le changement de photo de profil
+     * Listener for profile picture change to trigger preview.
      */
     if (fileInput && avatarPreview) {
         fileInput.addEventListener('change', () => previewImage(fileInput, avatarPreview));
     }
 
     /**
-     * Listener pour la validation du formulaire
+     * Validates the profile form before submission.
+     * Ensures passwords match if a new password is provided.
      */
     if (profilForm) {
         profilForm.addEventListener('submit', (e) => {
             if (passField && confirmField && passField.value !== "") {
                 if (passField.value !== confirmField.value) {
                     e.preventDefault();
-                    alert("Les mots de passe ne correspondent pas.");
+                    alert("Passwords do not match.");
                     confirmField.focus();
                 }
             }
@@ -62,7 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Gestion automatique de la classe active sur la navigation
+     * Automatically applies the 'active' class to the navigation link
+     * matching the current URL path.
      */
     const currentPath = window.location.pathname;
     document.querySelectorAll('.profil-nav a').forEach(link => {

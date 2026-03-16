@@ -1,48 +1,66 @@
 /**
- * @file Carte interactive avec recherche de points d’intérêt (POI) de la page index
+ * @file Interactive map with Point of Interest (POI) search
  * @description
- * Ce script initialise une carte Leaflet permettant :
- * - La géolocalisation utilisateur
- * - La recherche d’un lieu via Nominatim
- * - L’affichage de points d’intérêt via l’API Overpass (OpenStreetMap)
- * - Le filtrage par catégorie et réglage du rayon
- * * Dépendances : Leaflet.js, API Overpass, API Nominatim
+ * This script initializes a Leaflet map providing:
+ * - User geolocation
+ * - Location search via Nominatim API
+ * - POI display via Overpass API (OpenStreetMap)
+ * - Filtering by category and search radius adjustment
+ * @requires Leaflet.js
+ * @requires OverpassAPI
+ * @requires NominatimAPI
  */
 
 /* ======================================================
-    CONFIGURATION ET VARIABLES GLOBALES
+    CONFIGURATION AND GLOBAL VARIABLES
 ====================================================== */
 
-/** @type {Object} */
+/** * Global application configuration
+ * @type {Object}
+ */
 const appConfig = window.appConfig || {};
 
-/** @type {number[]} Coordonnées par défaut (Lyon par exemple) */
+/** * Default coordinates (e.g., Lyon, FR)
+ * @type {number[]}
+ */
 const defaultCoords = [appConfig.defaultLat || 45.767518, appConfig.defaultLon || 4.833534];
 
-/** @type {L.Map} Instance de la carte Leaflet */
+/** * Leaflet map instance
+ * @type {L.Map}
+ */
 let map;
 
-/** @type {L.LayerGroup} Calques pour les marqueurs */
+/** * Layer groups for markers
+ * @type {L.LayerGroup}
+ */
 let searchLayer, poiLayer;
 
-/** @type {number[]} Position actuelle de recherche */
+/** * Current search position coordinates
+ * @type {number[]}
+ */
 let currentCoords = defaultCoords;
 
-/** @type {L.Circle|null} Cercle visualisant le rayon de recherche */
+/** * Circle object visualizing the search radius
+ * @type {L.Circle|null}
+ */
 let currentCircle = null;
 
-/** @type {number} Rayon de recherche en mètres */
+/** * Search radius in meters
+ * @type {number}
+ */
 let searchRadius = 2000;
 
 /**
- * Configuration des filtres Overpass
+ * Overpass filter configuration definition
  * @typedef {Object} POIFilter
- * @property {string} query - Requête Overpass
- * @property {string} icon - Emoji affiché
- * @property {string} color - Couleur du marqueur
+ * @property {string} query - The Overpass QL query string
+ * @property {string} icon - Emoji character for the marker
+ * @property {string} color - Hex color for the marker background
  */
 
-/** @type {Object.<string, POIFilter>} */
+/** * Dictionary of available POI filters
+ * @type {Object.<string, POIFilter>}
+ */
 const poiFilters = {
     restaurant: { query: 'node["amenity"="restaurant"](around:{radius},{lat},{lon});', icon: '🍽️', color: '#e74c3c' },
     fast_food: { query: 'node["amenity"="fast_food"](around:{radius},{lat},{lon});', icon: '🍔', color: '#e67e22' },
@@ -59,12 +77,14 @@ const poiFilters = {
 };
 
 /* ======================================================
-   FONCTIONS GLOBALES
+   GLOBAL FUNCTIONS
    ====================================================== */
 
 /**
- * Gère l'ouverture/fermeture de la barre latérale des filtres.
+ * Handles the opening and closing of the filter sidebar.
+ * Updates map size after transition.
  * @function toggleSidebar
+ * @returns {void}
  */
 function toggleSidebar() {
     const sidebar = document.getElementById('mapSidebar');
@@ -81,10 +101,11 @@ function toggleSidebar() {
 }
 
 /**
- * Crée une icône personnalisée Leaflet avec un emoji.
- * @param {string} emoji
- * @param {string} color
- * @returns {L.DivIcon}
+ * Creates a custom Leaflet DivIcon with an emoji and colored background.
+ * @function createCustomIcon
+ * @param {string} emoji - The emoji to display
+ * @param {string} color - The background color (hex/css)
+ * @returns {L.DivIcon} The created Leaflet icon
  */
 function createCustomIcon(emoji, color) {
     return L.divIcon({
@@ -97,7 +118,7 @@ function createCustomIcon(emoji, color) {
 }
 
 /* ======================================================
-   3. INITIALISATION ET LOGIQUE DOM
+   INITIALIZATION AND DOM LOGIC
    ====================================================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -111,7 +132,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!document.getElementById('userMapIndex')) return;
 
     /**
-     * Initialise la carte et les calques.
+     * Initializes the map and layers.
+     * Sets up geolocation and click listeners.
+     * @inner
+     * @function initMap
      */
     function initMap() {
         map = L.map('userMapIndex').setView(currentCoords, 6);
@@ -135,12 +159,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         map.on('click', e => updateSearchPosition(e.latlng.lat, e.latlng.lng));
 
-        // Correctif pour les problèmes d'affichage de tuiles au chargement
         setTimeout(() => { map.invalidateSize(); }, 200);
     }
 
     /**
-     * Met à jour la position du marqueur central et du cercle de rayon.
+     * Updates the central marker position and search circle radius.
+     * @inner
+     * @function updateSearchPosition
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     * @param {number|null} [zoom=null] - Optional zoom level
      */
     function updateSearchPosition(lat, lng, zoom = null) {
         currentCoords = [lat, lng];
@@ -167,7 +195,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
-     * Appelle l'API Overpass pour charger les POI selon la catégorie.
+     * Calls the Overpass API to load POIs based on the selected category.
+     * @async
+     * @inner
+     * @function loadPOI
+     * @param {string} filterType - The category key from poiFilters
      */
     async function loadPOI(filterType) {
         poiLayer.clearLayers();
