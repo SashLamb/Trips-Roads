@@ -1,9 +1,26 @@
+/**
+ * @file Trips&Road and Interactive Map
+ * @description
+ * This script manages the creation of roadtrip itineraries. It allows users to:
+ * - Search for cities and locations via Nominatim API.
+ * - Add segments (start and end points) to a trip.
+ * - Manage sub-steps (stops) with descriptions, images, and duration.
+ * - Calculate routes and distances using the OSRM API.
+ * - Compress images on the client-side before upload.
+ * - Handle favorites and markers via Leaflet.
+ * * @requires Leaflet
+ * @requires OSRM API
+ * @requires Nominatim API
+  * @requires Leaflet
+ */
 document.addEventListener('DOMContentLoaded', async () => {
     if (!document.getElementById('map')) {
         return;
     }
 
+    /** @type {Array} Stores user favorite locations */
     let userFavorites = [];
+    /** @type {Object} Stores Quill editor instances */
     let subStepEditors = {};
 
     try {
@@ -19,9 +36,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ============================================================
-    // 0. FONCTION DE COMPRESSION D'IMAGE (CÔTÉ CLIENT)
+    // 0. CLIENT-SIDE IMAGE COMPRESSION
     // ============================================================
-
+    /**
+     * Compresses an image file using a Canvas element.
+     * @function compresserImageJS
+     * @param {File} file - The original image file.
+     * @param {number} [quality=0.7] - Compression quality (0 to 1).
+     * @param {number} [maxWidth=1920] - Maximum width for the resized image.
+     * @returns {Promise<File>} A promise that resolves with the compressed Blob.
+     */
     function compresserImageJS(file, quality = 0.7, maxWidth = 1920) {
         return new Promise((resolve, reject) => {
             const fileName = file.name;
@@ -61,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ============================================================
-    // 0b. UTILITAIRES DE TEMPS ET DISTANCE
+    // 0b. Time & Distance fuction
     // ============================================================
 
     function formatDuration(seconds) {
@@ -81,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ============================================================
-    // 1. INITIALISATION DE LA CARTE & VARIABLES
+    // 1. MAP INITIALIZATION
     // ============================================================
 
     const regionsConfig = {
@@ -109,16 +133,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             map.flyTo(config.center, config.zoom, { duration: 1.5 });
         });
     }
-
+    /** @type {L.Map} Leaflet map instance */
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '@ OpenStreetMap'
     }).addTo(map);
 
+    /** @type {Object} Reference to active markers on the map */
+    let markers = {};
+    /** @type {Array} List of itinerary segments */
     let segments = [];
-    const markers = {};
+    /** @type {string} Current starting city name for the next segment */
     let currentStartCity = (typeof USER_DEFAULT_CITY !== 'undefined') ? USER_DEFAULT_CITY : "";
-    let currentStartCoords = null;
+    /** @type {Object|null} Coordinates of the current starting city */
+    let currentStartCoords = (typeof USER_DEFAULT_COORDS !== 'undefined') ? USER_DEFAULT_COORDS : null;
 
     const strategies = {
         'Voiture': 'driving',
