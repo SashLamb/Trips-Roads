@@ -1,21 +1,21 @@
 /**
- * @file Gestion des préférences d’accessibilité
+ * @file Accessibility preferences management
  * @description
- * Ce script gère les préférences d’accessibilité utilisateur :
- * - Thème sombre / clair
- * - Mode malvoyant (taille/contraste adapté)
- * - Filtres pour différents types de daltonisme
+ * This script handles user accessibility preferences:
+ * - Dark / Light theme
+ * - Visually impaired mode (adapted size/contrast)
+ * - Filters for different types of color blindness
  *
- * Les préférences sont sauvegardées dans le localStorage
- * et réappliquées automatiquement au chargement de la page.
+ * Preferences are stored in localStorage and automatically
+ * reapplied when the page loads.
  */
 
 /**
- * Applique les préférences enregistrées dans le localStorage.
- * @function appliquerPreferences
+ * Applies saved preferences from localStorage to the document.
+ * @function applyPreferences
  * @returns {void}
  */
-function appliquerPreferences() {
+function applyPreferences() {
     const savedTheme = localStorage.getItem("theme");
     const savedMalvoyant = localStorage.getItem("Police");
     const savedDaltonienType = localStorage.getItem("typeDaltonien");
@@ -24,8 +24,8 @@ function appliquerPreferences() {
     const checkboxMalvoyant = document.getElementById("checkboxMalvoyant");
 
     /* =========================
-       Gestion du thème sombre
-    ========================== */
+           Dark Theme Management
+        ========================== */
     if (savedTheme === "dark") {
         document.documentElement.classList.add("dark", "SombreBtn");
         if (checkboxSombre) checkboxSombre.checked = true;
@@ -35,8 +35,8 @@ function appliquerPreferences() {
     }
 
     /* =========================
-       Gestion du mode malvoyant
-    ========================== */
+           Visually Impaired Mode
+        ========================== */
     if (savedMalvoyant === "malvoyant") {
         document.documentElement.classList.add("malvoyant", "MalvoyantBtn");
         if (checkboxMalvoyant) checkboxMalvoyant.checked = true;
@@ -46,8 +46,8 @@ function appliquerPreferences() {
     }
 
     /* =========================
-       Gestion du daltonisme
-    ========================== */
+           Color Blindness Management
+        ========================== */
     document.documentElement.classList.remove(
         "daltonien",
         "protanopia",
@@ -66,12 +66,12 @@ function appliquerPreferences() {
 }
 
 /**
- * Enregistre les préférences utilisateur lors de la soumission du formulaire.
- * @function enregistrerPreferences
- * @param {SubmitEvent} event - Événement déclenché lors de la soumission
+ * Saves user preferences to localStorage when the form is submitted.
+ * @function savePreferences
+ * @param {SubmitEvent} event - The form submission event
  * @returns {void}
  */
-function enregistrerPreferences(event) {
+function savePreferences(event) {
 
 
     const checkboxSombre = document.getElementById("checkboxSombre");
@@ -79,7 +79,7 @@ function enregistrerPreferences(event) {
     const radioDaltonien = document.querySelector('input[name="daltonism-type"]:checked');
 
     /* =========================
-       Sauvegarde du thème
+       Theme Save
     ========================== */
     if (checkboxSombre && checkboxSombre.checked) {
         localStorage.setItem("theme", "dark");
@@ -88,7 +88,7 @@ function enregistrerPreferences(event) {
     }
 
     /* =========================
-       Sauvegarde du mode malvoyant
+       Visually Impaired Save
     ========================== */
     if (checkboxMalvoyant && checkboxMalvoyant.checked) {
         localStorage.setItem("Police", "malvoyant");
@@ -97,7 +97,7 @@ function enregistrerPreferences(event) {
     }
 
     /* =========================
-       Sauvegarde du type de daltonisme
+      Color Blindness Type Save
     ========================== */
     if (radioDaltonien && radioDaltonien.value) {
         localStorage.setItem("typeDaltonien", radioDaltonien.value);
@@ -105,22 +105,22 @@ function enregistrerPreferences(event) {
         localStorage.removeItem("typeDaltonien");
     }
 
-    appliquerPreferences();
+    applyPreferences();
 }
 
 /**
- * Initialise le script lorsque le DOM est entièrement chargé.
+ * Initializes the script when the DOM is fully loaded.
  * @event DOMContentLoaded
  */
 document.addEventListener("DOMContentLoaded", () => {
-    appliquerPreferences();
+    applyPreferences();
 
     const form = document.getElementById("accessForm");
 
     if (form) {
         form.addEventListener("submit", (event) => {
             event.preventDefault();
-            enregistrerPreferences(event);
+            savePreferences(event);
         });
     }
 });
