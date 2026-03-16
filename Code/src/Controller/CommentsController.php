@@ -17,15 +17,16 @@ class CommentsController extends AppController
      */
     public function index()
     {
-        // On récupère l'ID de l'utilisateur connecté
-        $userId = $this->request->getAttribute('identity')->getIdentifier();
-
+        $identity = $this->request->getAttribute('identity');
         $query = $this->Comments->find()
-            ->where(['Comments.user_id' => $userId]) // C'est cette ligne qui fait le tri !
             ->contain(['Users', 'Roadtrips', 'PointsOfInterests']);
 
-        $comments = $this->paginate($query);
+        // Si l'utilisateur n'est PAS admin, on filtre uniquement ses commentaires
+        if ($identity->get('role') !== 'admin') {
+            $query->where(['Comments.user_id' => $identity->getIdentifier()]);
+        }
 
+        $comments = $this->paginate($query);
         $this->set(compact('comments'));
     }
 
@@ -38,18 +39,16 @@ class CommentsController extends AppController
      */
     public function view($id = null)
     {
-        // 1. Récupérer l'ID de l'utilisateur actuellement connecté
-        $userId = $this->Authentication->getIdentity()->getIdentifier();
-
-        // 2. Chercher le commentaire avec une condition supplémentaire sur l'user_id
-        $comment = $this->Comments->find()
-            ->where([
-                'id' => $id,
-                'user_id' => $userId // On s'assure que le commentaire appartient bien à l'utilisateur
-            ])
+        $identity = $this->request->getAttribute('identity');
+        $query = $this->Comments->find()
             ->contain(['Users', 'Roadtrips', 'PointsOfInterests'])
-            ->firstOrFail(); // Lance une RecordNotFoundException si pas de correspondance
+            ->where(['Comments.id' => $id]);
 
+        if ($identity->get('role') !== 'admin') {
+            $query->where(['Comments.user_id' => $identity->getIdentifier()]);
+        }
+
+        $comment = $query->firstOrFail();
         $this->set(compact('comment'));
     }
 
