@@ -573,9 +573,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnAddSegment = document.getElementById('btnAddSegment');
     const newBlockFormContainer = document.getElementById('newBlockForm');
 
+
     if (btnAddSegment) {
         btnAddSegment.addEventListener('click', () => {
             btnAddSegment.style.display = 'none';
+            newBlockFormContainer.style.display = 'contents';
+
             let html = '';
 
             if (!currentStartCoords) {
@@ -613,6 +616,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('btnCancelBlock').addEventListener('click', () => {
                 newBlockFormContainer.innerHTML = '';
                 btnAddSegment.style.display = 'block';
+                newBlockFormContainer.style.display = 'none';
             });
 
             document.getElementById('btnValidateBlock').addEventListener('click', async () => {

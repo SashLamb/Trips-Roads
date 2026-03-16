@@ -90,9 +90,12 @@
 }
 
 .card-info {
+    background: var(--beige_fonce);
     padding: 15px;
     text-align: center;
 }
+
+
 
 .card-info h3 {
     margin: 0 0 10px 0;
@@ -149,7 +152,7 @@
 
 .floating-search button {
     padding: 12px 25px;
-    background: var(--bleu_clair);
+    background: var(--beige_fonce);
     border: none;
     border-radius: 0 30px 30px 0;
     color: white;
@@ -177,7 +180,7 @@
 }
 
 .sidebar-content {
-    background: var(--beige);
+    background: var(--beige_fonce);
     backdrop-filter: blur(5px);
     border-radius: 15px;
     box-shadow: 0 5px 25px rgba(0,0,0,0.2);
@@ -233,6 +236,7 @@
 }
 
 .category-select {
+    background: var(--bleu_clair);
     width: 100%;
     padding: 10px;
     border-radius: 8px;

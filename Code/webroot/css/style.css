@@ -193,14 +193,7 @@ input::placeholder {
 }
 
 
-.profil-nom {
-    position: relative;
-    font-weight: bold;
-    color : var(--beige) ;
-    font-size: 15px;
-    left : -7px ;
-    top: 75px ;
-}
+
 .pp_logout{
     position : relative ;
     right : 32px ;

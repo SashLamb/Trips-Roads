@@ -265,6 +265,7 @@ x
     'profil',
     'viewRoadtrip',
     'accessibility',
+    'creationRT',
 ]) ?>
 
 <?= $this->fetch('script') ?>
