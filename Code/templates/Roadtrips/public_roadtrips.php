@@ -39,7 +39,8 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
         <h1 class="sidebar-title">Road Trips Publics</h1>
 
         <?php if (isset($userId)): ?>
-            <a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'add']) ?>" class="sidebar-create-btn">
+            <a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'add']) ?>"
+               class="sidebar-create-btn">
                 <i class="material-icons">add_circle</i> Créer un Road Trip
             </a>
         <?php endif; ?>
@@ -47,14 +48,20 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
         <nav class="profil-nav">
             <ul>
                 <?php if (isset($userId)): ?>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?>">Mes Road-Trips</a></li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?>">Mes
+                            Road-Trips</a></li>
                 <?php endif; ?>
-                <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'publicRoadtrips']) ?>" class="active">Road-Trips Publics</a></li>
+                <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'publicRoadtrips']) ?>"
+                       class="active">Road-Trips Publics</a></li>
                 <?php if (isset($userId)): ?>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'profile']) ?>">Paramètres</a></li>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="logout">Déconnexion</a></li>
+                    <li>
+                        <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'profile']) ?>">Paramètres</a>
+                    </li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>"
+                           class="logout">Déconnexion</a></li>
                 <?php else: ?>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>">Se connecter</a></li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'login']) ?>">Se
+                            connecter</a></li>
                 <?php endif; ?>
             </ul>
         </nav>
@@ -70,9 +77,9 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                 <?php foreach ($roadtrips as $rt): ?>
 
                     <?php
-                    $isTermine    = ($rt->status === 'completed' || $rt->status === 'termine');
+                    $isTermine = ($rt->status === 'completed' || $rt->status === 'termine');
                     $classeStatus = $isTermine ? 'statut-termine' : 'statut-brouillon';
-                    $labelStatus  = $isTermine ? 'Terminé' : 'En cours';
+                    $labelStatus = $isTermine ? 'Terminé' : 'En cours';
 
                     $urlImage = '/img/imgBase.png';
                     if (!empty($rt->photo_url)) {
@@ -103,7 +110,8 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                         </div>
 
                         <div class="roadtrip-actions">
-                            <a class="action-btn view" href="<?= $this->Url->build(['action' => 'view', $rt->id]) ?>" title="Voir">
+                            <a class="action-btn view" href="<?= $this->Url->build(['action' => 'view', $rt->id]) ?>"
+                               title="Voir">
                                 <i class="material-icons">visibility</i>
                             </a>
 
@@ -119,21 +127,27 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 <?php endif; ?>
                             <?php endif; ?>
 
-                            <button type="button" class="action-btn" onclick="openRoadtripModal('modalAvis-<?= $rt->id ?>')" title="Voir les avis">
+                            <button type="button" class="action-btn"
+                                    onclick="openRoadtripModal('modalAvis-<?= $rt->id ?>')" title="Voir les avis">
                                 <i class="material-icons">rate_review</i>
                             </button>
 
                             <?php if ($currentUser): ?>
-                                <button type="button" class="action-btn" onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')" title="Laisser un avis">
+                                <button type="button" class="action-btn"
+                                        onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')"
+                                        title="Laisser un avis">
                                     <i class="material-icons">add_comment</i>
                                 </button>
                             <?php endif; ?>
 
-                            <a class="action-btn"
-                               href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportGpx', $rt->id]) ?>"
-                               title="Exporter en GPX">
+                            <button type="button" class="action-btn"
+                                    onclick="telechargerPackExport(
+                                        '<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportGpx', $rt->id]) ?>',
+                                        '<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportPdf', $rt->id]) ?>'
+                                        )"
+                                    title="Exporter en GPX et PDF">
                                 <i class="material-icons">file_download</i>
-                            </a>
+                            </button>
 
                             <?php if ($isOwner || $isAdmin): ?>
                                 <?= $this->Form->postLink('<i class="material-icons">delete</i>',
@@ -161,7 +175,8 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                             </h3>
                             <button class="modal-close"
                                     onclick="closeRoadtripModal('modalAvis-<?= $rt->id ?>')"
-                                    aria-label="Fermer">&times;</button>
+                                    aria-label="Fermer">&times;
+                            </button>
                         </div>
 
                         <div class="modal-body">
@@ -237,7 +252,8 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 </h3>
                                 <button class="modal-close"
                                         onclick="closeRoadtripModal('modalComment-<?= $rt->id ?>')"
-                                        aria-label="Fermer">&times;</button>
+                                        aria-label="Fermer">&times;
+                                </button>
                             </div>
 
                             <div class="modal-body">
@@ -255,8 +271,10 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                     <label class="form-label">Votre note</label>
                                     <div class="modern-star-rating">
                                         <?php for ($i = 5; $i >= 1; $i--): ?>
-                                            <input type="radio" id="star<?= $i ?>-<?= $rt->id ?>" name="rating" value="<?= $i ?>" required />
-                                            <label for="star<?= $i ?>-<?= $rt->id ?>" title="<?= $i ?> étoiles">★</label>
+                                            <input type="radio" id="star<?= $i ?>-<?= $rt->id ?>" name="rating"
+                                                   value="<?= $i ?>" required/>
+                                            <label for="star<?= $i ?>-<?= $rt->id ?>"
+                                                   title="<?= $i ?> étoiles">★</label>
                                         <?php endfor; ?>
                                     </div>
                                 </div>
@@ -264,8 +282,8 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 <div class="form-group">
                                     <label class="form-label">Commentaire</label>
                                     <?= $this->Form->textarea('body', [
-                                        'rows'        => 4,
-                                        'class'       => 'form-textarea',
+                                        'rows' => 4,
+                                        'class' => 'form-textarea',
                                         'placeholder' => 'Partagez votre expérience...',
                                     ]) ?>
                                 </div>
