@@ -851,7 +851,6 @@ class RoadtripsController extends AppController
 
         $pdfOutput = $dompdf->output();
         $filename = 'Carnet_de_route_' . preg_replace('/[^a-zA-Z0-9]/', '_', $roadtrip->title) . '.pdf';
-
         return $this->response
             ->withType('application/pdf')
             ->withDownload($filename)

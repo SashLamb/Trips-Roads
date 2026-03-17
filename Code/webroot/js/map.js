@@ -759,6 +759,9 @@ function openNewSegmentForm() {
 
     newBlockFormContainer.innerHTML = html;
 
+    newBlockFormContainer.classList.remove('hidden');
+    newBlockFormContainer.style.display = 'block';
+
     const inputStart = document.getElementById('inputStartBlock');
     if (inputStart) {
         const selectStart = createFavSelectForInput('inputStartBlock');
@@ -775,6 +778,7 @@ function openNewSegmentForm() {
 
     document.getElementById('btnCancelBlock').addEventListener('click', () => {
         newBlockFormContainer.innerHTML = '';
+        newBlockFormContainer.style.display = 'none';
         btnAddSegment.style.display = 'block';
     });
 
@@ -825,7 +829,9 @@ async function validateNewSegment() {
     state.currentStartCoords = endCoords;
 
     document.getElementById('newBlockForm').innerHTML = '';
+    document.getElementById('newBlockForm').style.display = 'none';
     document.getElementById('btnAddSegment').style.display = 'block';
+
 }
 
 // ============================================================
