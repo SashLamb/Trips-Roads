@@ -52,6 +52,7 @@ class Roadtrip extends Entity
         'trips' => true,
         'points_of_interests' => true,
         'place' => true,
+        'photo_cover' => true,
     ];
 
     /**
