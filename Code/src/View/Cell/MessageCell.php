@@ -5,12 +5,12 @@ use Cake\View\Cell;
 
 class MessageCell extends Cell
 {
-    public function display($userId)
+    public function display($userId, $amiId = null)
     {
         $messagesTable = $this->fetchTable('Messages');
 
         $lastMessages = $messagesTable->find()
-            ->contain(['Senders', 'Recipients']) // Charge les entités User liées
+            ->contain(['Senders', 'Recipients'])
             ->where(['OR' => [['sender_id' => $userId], ['recipient_id' => $userId]]])
             ->orderDesc('Messages.created')
             ->all();
@@ -19,22 +19,24 @@ class MessageCell extends Cell
         foreach ($lastMessages as $msg) {
             $isSender = ($msg->sender_id == $userId);
             $ami = $isSender ? $msg->recipient : $msg->sender;
-            $amiId = $ami->id;
+            if (!$ami) continue;
 
-            if (isset($conversations[$amiId])) continue;
+            $idAmi = $ami->id;
+            if (isset($conversations[$idAmi])) continue;
 
             $unreadCount = $messagesTable->find()
-                ->where(['sender_id' => $amiId, 'recipient_id' => $userId, 'is_read' => 0])
+                ->where(['sender_id' => $idAmi, 'recipient_id' => $userId, 'is_read' => 0])
                 ->count();
 
-            $conversations[$amiId] = (object)[
-                'id' => $amiId,
+            $conversations[$idAmi] = (object)[
+                'id' => $idAmi,
                 'ami' => $ami,
-                'last_message' => $msg->body, // Chiffrement géré par l'entité
+                'last_message_entity' => $msg, // On passe l'entité pour accéder au ->content
                 'unread_count' => $unreadCount
             ];
         }
 
         $this->set('enriched', array_values($conversations));
+        $this->set('activeAmiId', $amiId);
     }
 }

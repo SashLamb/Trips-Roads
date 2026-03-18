@@ -50,12 +50,14 @@
         'index',
         'messagerie',
         'messaging-realtime',
+        'myComments',
         'page_link',
+        'pdfStyle',
         'profil',
         'roadTrip',
         'style',
         'view',
-        'myComments',
+
     ]) ?>
 
     <?= $this->fetch('meta') ?>
