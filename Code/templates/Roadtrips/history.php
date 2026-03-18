@@ -12,7 +12,7 @@ $this->assign('mainClass', 'history-page');
     <div class="flex-header-tools">
         <h1>🕓 Mon Historique</h1>
 
-        <?php if (!$historique->isEmpty()): ?>
+        <?php if (!$historyRecords->isEmpty()): ?>
             <?= $this->Form->postLink(
                 '<i class="material-icons icon-align-middle">delete_sweep</i> Tout effacer',
                 ['action' => 'deleteHistorique'],
@@ -27,7 +27,7 @@ $this->assign('mainClass', 'history-page');
 
     <?= $this->Flash->render() ?>
 
-    <?php if ($historique->isEmpty()): ?>
+    <?php if ($historyRecords->isEmpty()): ?>
         <p class="text-center-empty">
             Vous n'avez consulté aucun road trip récemment.
         </p>
@@ -40,7 +40,7 @@ $this->assign('mainClass', 'history-page');
     <?php else: ?>
 
         <div class="roadtrip-grid">
-            <?php foreach ($historique as $item): ?>
+            <?php foreach ($historyRecords as $item): ?>
                 <?php
                 $rt = $item->roadtrip;
                 if (!$rt) continue;

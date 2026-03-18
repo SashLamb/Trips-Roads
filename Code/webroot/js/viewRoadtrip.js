@@ -455,13 +455,16 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    const tripHeaders = document.querySelectorAll('.js-trip-toggle');
+    document.querySelectorAll('.js-trip-toggle').forEach(function(header) {
 
-    tripHeaders.forEach(function(header) {
         header.addEventListener('click', function() {
             const tripId = this.getAttribute('data-trip-id');
+            const container = document.getElementById('sous-etapes-' + tripId);
 
-            toggleTrajet(tripId);
+            if (container) {
+                container.classList.toggle('d-none');
+            }
         });
+
     });
 });

@@ -165,7 +165,7 @@ $currentUser = $this->request->getAttribute('identity');
                 <li><?= $this->Html->link('Commentaires', ['controller' => 'Comments', 'action' => 'index']) ?></li>
                 <li><?= $this->Html->link('Mon Compte', ['controller' => 'Users', 'action' => 'profile']) ?></li>
                 <li><?= $this->Html->link('Favoris', ['controller' => 'Favorites', 'action' => 'index']) ?></li>
-                <li><?= $this->Html->link('Historique', ['controller' => 'Roadtrips', 'action' => 'historique']) ?></li>
+                <li><?= $this->Html->link('Historique', ['controller' => 'Roadtrips', 'action' => 'history']) ?></li>
                 <li><?= $this->Html->link('Aide / FAQ', ['controller' => 'PageLink', 'action' => 'faq']) ?></li>
                 <li><?= $this->Html->link('A propos / Contact', ['controller' => 'PageLink', 'action' => 'contact']) ?></li>
                 <li><?= $this->Html->link('Déconnexion', ['controller' => 'Users', 'action' => 'logout']) ?></li>

@@ -56,8 +56,9 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ü
                     <div class="trip-title-group">
                         <h2><?= h($trip->departure) ?> ‚ûù <?= h($trip->arrival) ?></h2>
                         <div class="trip-infos">
-                            <span>üìÖ <?= $trip->trip_date ? $trip->trip_date->format('d/m/Y') : '' ?></span>
-                            <span><?= $getTransportIcon($trip->transport_mode) ?> <?= ucfirst($trip->transport_mode) ?></span>
+                            <span>üìÖ <?= !empty($trip->date) ? (is_object($trip->date) ? $trip->date->format('d/m/Y') : h($trip->date)) : '' ?></span>
+
+                            <span><?= $getTransportIcon($trip->transport_mode) ?> <?= ucfirst((string)$trip->transport_mode) ?></span>
                         </div>
                     </div>
                     <div class="trip-toggle-btn toggle-icon">‚ñº</div>
@@ -72,8 +73,6 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ü
 
                         foreach ($trip->sub_steps as $subStep) {
                             $pauseValue = '00:00:00';
-                            // J'utilise $subStep->duration car $ss->heure est du fran√ßais. Assure-toi que ton Entity utilise bien 'duration' ou 'heure'.
-                            // Si ta BDD utilise 'heure', change $subStep->duration par $subStep->heure ci-dessous.
                             $timeField = $subStep->duration ?? $subStep->heure ?? null;
                             if (!empty($timeField)) {
                                 $pauseValue = is_object($timeField) && method_exists($timeField, 'format') ? $timeField->format('H:i:s') : (string)$timeField;
@@ -104,7 +103,7 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ü
 
                                         <?php if ($timelineStep['type'] === 'departure'): ?>
                                             <span class="step-time">
-                                                D√©part : <strong><?= is_object($timelineStep['time']) ? $timelineStep['time']->format('H:i') : substr($timelineStep['time'], 0, 5) ?></strong>
+                                                D√©part : <strong><?= is_object($timelineStep['time']) ? $timelineStep['time']->format('H:i') : substr((string)$timelineStep['time'], 0, 5) ?></strong>
                                             </span>
                                         <?php else: ?>
                                             <span class="horaire-calcule">
@@ -116,7 +115,7 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ü
                                     <?php if ($timelineStep['type'] === 'stop'): ?>
                                         <?php if ($dataPause !== '00:00' && $dataPause !== '00:00:00'): ?>
                                             <div class="pause-text">
-                                                ‚òï Pause : <strong><?= substr($dataPause, 0, 5) ?></strong>
+                                                ‚òï Pause : <strong><?= substr((string)$dataPause, 0, 5) ?></strong>
                                             </div>
                                         <?php endif; ?>
 
@@ -143,8 +142,10 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ü
 
                             <?php if ($index < count($timelineSteps) - 1): ?>
                                 <div class="transport-segment">
-                                    <div class="segment-info" data-mode="<?= strtolower($trip->transport_mode) ?>">
-                                        <span class="segment-icon"><?= $getTransportIcon($trip->transport_mode) ?></span>
+                                    <div class="segment-info"
+                                         data-mode="<?= strtolower((string)$trip->transport_mode) ?>">
+                                        <span
+                                            class="segment-icon"><?= $getTransportIcon($trip->transport_mode) ?></span>
                                         <span class="segment-distance">...</span> ‚Ä¢
                                         <span class="segment-time">...</span>
                                     </div>
@@ -162,8 +163,7 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ü
             </div>
         <?php endforeach; ?>
     </div>
-</div>
 
-<script>
-    const roadTripData = <?= $jsMapDataJson ?>;
-</script>
+    <script>
+        const roadTripData = <?= $jsMapDataJson ?>;
+    </script>

@@ -2,18 +2,18 @@
 /**
  * @var \App\View\AppView $this
  * @var \App\Model\Entity\Roadtrip $roadtrip
- * @var bool $modeEdition
+ * @var bool $isEditMode
  * @var array $existingTrajets
  * @var string $userDefaultCity
  */
 
-$this->assign('title', $modeEdition ? 'Modifier le RoadTrip' : 'Création de RoadTrip');
+$this->assign('title', $isEditMode ? 'Modifier le RoadTrip' : 'Création de RoadTrip');
 $this->assign('mainClass', '');
 ?>
 
 <script>
     const USER_DEFAULT_CITY = "<?= h($userDefaultCity) ?>";
-    const MODE_EDITION = <?= json_encode($modeEdition) ?>;
+    const MODE_EDITION = <?= json_encode($isEditMode) ?>;
     const URL_GET_FAVORIS = "<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'getLieuxFavoris']) ?>";
     const UPLOAD_IMAGE_URL = "<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'uploadStepImage']) ?>";
 
@@ -28,11 +28,11 @@ $this->assign('mainClass', '');
 
     const EXISTING_TRAJETS = <?= json_encode($existingTrajets) ?>;
 
-    const SAVE_URL = "<?= $this->Url->build(['action' => $modeEdition ? 'edit' : 'add', $modeEdition ? $roadtrip->id : null]) ?>";
+    const SAVE_URL = "<?= $this->Url->build(['action' => $isEditMode ? 'edit' : 'add', $isEditMode ? $roadtrip->id : null]) ?>";
     const CSRF_TOKEN = "<?= $this->request->getAttribute('csrfToken') ?>";
 </script>
 
-<h1 class="roadtrip-main-title"><?= $modeEdition ? "Modifier mon RoadTrip" : "Créer un RoadTrip" ?></h1>
+<h1 class="roadtrip-main-title"><?= $isEditMode ? "Modifier mon RoadTrip" : "Créer un RoadTrip" ?></h1>
 
 <div class="main-container">
     <div class="sidebar">
@@ -113,7 +113,7 @@ $this->assign('mainClass', '');
 
             <div class="image-upload-container margin-bottom">
                 <label class="bold-label">Couverture du Road Trip :</label>
-                <?php if ($modeEdition && !empty($roadtrip->photo_url)): ?>
+                <?php if ($isEditMode && !empty($roadtrip->photo_url)): ?>
                     <div class="current-image-wrapper">
                         <?= $this->Html->image('roadtrips/' . $roadtrip->photo_url, ['class' => 'preview-thumbnail', 'alt' => 'Couverture actuelle']) ?>
                         <br><small>Image actuelle</small>
@@ -130,7 +130,7 @@ $this->assign('mainClass', '');
 
             <?= $this->Form->hidden('trajets', ['id' => 'trajetsJsonData']) ?>
 
-            <?= $this->Form->button($modeEdition ? "Mettre à jour" : "Sauvegarder", [
+            <?= $this->Form->button($isEditMode ? "Mettre à jour" : "Sauvegarder", [
                 'type' => 'submit',
                 'id' => 'saveRoadtripBtn',
                 'class' => 'submit-btn full-width-btn margin-top-small'
