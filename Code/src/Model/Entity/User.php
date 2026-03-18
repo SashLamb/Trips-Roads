@@ -76,6 +76,7 @@ class User extends Entity
         'points_of_interests' => true,
         'roadtrips' => true,
         'user_tokens' => true,
+        'profile_picture_file' => true,
     ];
 
     /**

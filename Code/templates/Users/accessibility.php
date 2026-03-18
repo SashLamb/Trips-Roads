@@ -1,10 +1,5 @@
 <?php
 $this->assign('mainClass', 'accessibilite-container');
-
-// On prépare les valeurs par défaut proprement
-$isDarkMode = (bool)$this->request->getCookie('modeSombre');
-$isVisionMode = (bool)$this->request->getCookie('modeMalvoyant');
-$colorBlindType = $this->request->getCookie('typeDaltonien') ?: 'aucun';
 ?>
 
 <aside class="profil-sidebar">
@@ -51,7 +46,9 @@ $colorBlindType = $this->request->getCookie('typeDaltonien') ?: 'aucun';
             ['value' => 'protanopia', 'text' => ' Protanopie (Rouge/Vert)'],
             ['value' => 'deuteranopia', 'text' => ' Deutéranopie (Rouge/Vert)'],
             ['value' => 'tritanopia', 'text' => ' Tritanopie (Bleu/Jaune)']
-        ], ['value' => $colorBlindType]) ?>
+        ], [
+            'value' => $colorBlindType
+        ]) ?>
     </div>
 
     <?= $this->Form->button('Enregistrer les préférences', ['type' => 'submit', 'id' => 'confirmed']) ?>

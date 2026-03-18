@@ -64,8 +64,7 @@ $getTransportIcon = fn($mode) => $transportIcons[strtolower($mode ?? '')] ?? 'ðŸ
                     <div class="trip-toggle-btn toggle-icon">â–¼</div>
                 </div>
 
-                <div class="trip-content sous-etapes-container d-none" id="sous-etapes-<?= $trip->id ?>">
-
+                <div class="trip-content sub-steps-container d-none" id="sub-steps-<?= $trip->id ?>">
                     <div class="timeline-wrapper">
                         <?php
                         $timelineSteps = [];
