@@ -151,20 +151,6 @@ class RoadtripsController extends AppController
             $data = $this->request->getData();
             $data['user_id'] = $this->request->getAttribute('identity')->getIdentifier();
 
-            $photo = $this->request->getData('photo_cover');
-            if ($photo instanceof \Laminas\Diactoros\UploadedFile && $photo->getError() === UPLOAD_ERR_OK) {
-                $ext = pathinfo($photo->getClientFilename(), PATHINFO_EXTENSION);
-                $newName = 'rt_' . uniqid() . '.' . $ext;
-                $destination = WWW_ROOT . 'uploads/roadtrips/' . $newName;
-
-                if (!file_exists(dirname($destination))) {
-                    mkdir(dirname($destination), 0777, true);
-                }
-
-                $photo->moveTo($destination);
-                $data['photo_url'] = $newName;
-            }
-
             $jsonTrips = '[]';
             $tripsFile = $this->request->getData('trajets_file');
 
@@ -254,15 +240,6 @@ class RoadtripsController extends AppController
 
         if ($this->request->is(['patch', 'post', 'put'])) {
             $data = $this->request->getData();
-
-            $photo = $this->request->getData('photo_cover');
-            if ($photo instanceof \Laminas\Diactoros\UploadedFile && $photo->getError() === UPLOAD_ERR_OK) {
-                $ext = pathinfo($photo->getClientFilename(), PATHINFO_EXTENSION);
-                $newName = 'rt_' . uniqid() . '.' . $ext;
-                $destination = WWW_ROOT . 'uploads/roadtrips/' . $newName;
-                $photo->moveTo($destination);
-                $data['photo_url'] = $newName;
-            }
 
             $tripsFile = $this->request->getData('trajets_file');
 
