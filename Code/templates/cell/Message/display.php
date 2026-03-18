@@ -1,14 +1,21 @@
 <div class="message-sidebar">
-    <h3>Vos Conversations</h3>
-    <?php foreach ($enriched as $conv): ?>
-        <div class="conv-item <?= (isset($amiId) && $amiId == $conv->id) ? 'active' : '' ?>">
-            <a href="<?= $this->Url->build(['controller' => 'Messages', 'action' => 'view', $conv->id]) ?>">
-                <strong><?= h($conv->ami->username) ?></strong>
-                <p><?= h($conv->last_message) ?></p>
-                <?php if ($conv->unread_count > 0): ?>
-                    <span class="badge"><?= $conv->unread_count ?></span>
-                <?php endif; ?>
+    <?php if (empty($enriched)): ?>
+        <p class="no-conversations">Aucune conversation</p>
+    <?php else: ?>
+        <?php foreach ($enriched as $conv): ?>
+            <?php $isActive = (isset($activeAmiId) && $activeAmiId == $conv->id) ? 'active' : ''; ?>
+            <a href="<?= $this->Url->build(['controller' => 'Messages', 'action' => 'view', $conv->id]) ?>"
+               class="conversation-item <?= $isActive ?>">
+                <div class="conv-header">
+                    <span class="conv-name"><?= h($conv->ami->prenom . ' ' . $conv->ami->nom) ?></span>
+                    <?php if ($conv->unread_count > 0): ?>
+                        <span class="badge-unread"><?= $conv->unread_count ?></span>
+                    <?php endif; ?>
+                </div>
+                <p class="conv-preview">
+                    <?= h(mb_substr((string)$conv->last_message_entity->content, 0, 50)) ?>
+                </p>
             </a>
-        </div>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </div>
