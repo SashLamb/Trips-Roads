@@ -223,7 +223,6 @@ $mainClass = $this->fetch('mainClass', 'main-index');
 <?= $this->Html->script([
     'https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js',
     'https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js',
-    'https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js' // Note : tu charges Leaflet en double (v1.9.4 en haut et v1.7.1 ici) !
 ]) ?>
 
 <?= $this->Html->script('https://code.jquery.com/jquery-3.6.0.min.js') ?>
@@ -249,7 +248,7 @@ $mainClass = $this->fetch('mainClass', 'main-index');
 <?php endif; ?>
 
 <?= $this->Html->script('index', ['block' => true]) ?>
-x
+
 <?= $this->Html->script([
     'index',
     'map',

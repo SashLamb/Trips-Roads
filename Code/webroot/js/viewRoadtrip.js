@@ -453,3 +453,15 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tripHeaders = document.querySelectorAll('.js-trip-toggle');
+
+    tripHeaders.forEach(function(header) {
+        header.addEventListener('click', function() {
+            const tripId = this.getAttribute('data-trip-id');
+
+            toggleTrajet(tripId);
+        });
+    });
+});
