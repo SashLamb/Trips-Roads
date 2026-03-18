@@ -10,7 +10,7 @@ $parsedown = new \Parsedown();
 
     <div class="header-rt">
         <h1><?= h($roadtrip->title) ?></h1>
-        <p>Road Trip organized by <?= h($roadtrip->user->username) ?></p>
+        <p>Road-Trip organisé par <?= h($roadtrip->user->username) ?></p>
     </div>
 
 <?php if (!empty($roadtrip->description)): ?>
@@ -31,10 +31,10 @@ $parsedown = new \Parsedown();
 
     <div class="trip-card">
         <div class="trip-title">
-            From <?= h($trip->departure) ?> to <?= h($trip->arrival) ?>
+            De <?= h($trip->departure) ?> à <?= h($trip->arrival) ?>
             <span class="trip-badge">
-                <?= ucfirst($trip->transport_mode) ?>
-                <?php if ($trip->date): ?> | <?= $trip->date->format('Y-m-d') ?><?php endif; ?>
+                <?= ucfirst((string)$trip->transport_mode) ?>
+                <?php if ($trip->date): ?> | <?= $trip->date->format('d/m/Y') ?><?php endif; ?>
             </span>
         </div>
 
@@ -42,7 +42,7 @@ $parsedown = new \Parsedown();
 
             <div class="step start">
                 <?php if ($currentTimestamp): ?>
-                    <div class="step-time">Departure: <?= date('H:i', $currentTimestamp) ?></div>
+                    <div class="step-time">Départ : <?= date('H:i', $currentTimestamp) ?></div>
                     <?php $currentTimestamp += $drivingTimeSeconds; ?>
                 <?php endif; ?>
                 <h3 class="step-name"><?= h($trip->departure) ?></h3>
@@ -52,7 +52,7 @@ $parsedown = new \Parsedown();
                 <div class="step">
 
                     <?php if ($currentTimestamp): ?>
-                        <div class="step-time">Estimated passing: ~<?= date('H:i', $currentTimestamp) ?></div>
+                        <div class="step-time">Passage estimé : ~<?= date('H:i', $currentTimestamp) ?></div>
                     <?php endif; ?>
 
                     <h3 class="step-name"><?= h($step->city) ?></h3>
@@ -68,7 +68,7 @@ $parsedown = new \Parsedown();
                             $currentTimestamp += ($hours * 3600) + ($minutes * 60);
                         }
                         ?>
-                        <span class="step-pause">Planned time on site: <?= $pauseDurationStr ?></span>
+                        <span class="step-pause">Temps sur place prévu : <?= $pauseDurationStr ?></span>
                     <?php endif; ?>
 
                     <?php if (!empty($step->description)): ?>
@@ -87,7 +87,7 @@ $parsedown = new \Parsedown();
 
             <div class="step end">
                 <?php if ($currentTimestamp): ?>
-                    <div class="step-time">Estimated arrival: ~<?= date('H:i', $currentTimestamp) ?></div>
+                    <div class="step-time">Arrivée estimée : ~<?= date('H:i', $currentTimestamp) ?></div>
                 <?php endif; ?>
                 <h3 class="step-name"><?= h($trip->arrival) ?></h3>
             </div>

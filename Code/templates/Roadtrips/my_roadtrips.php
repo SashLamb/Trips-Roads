@@ -18,18 +18,18 @@ $this->assign('mainClass', '');
                 <h3><?= h($user->username) ?></h3>
             </div>
 
-            <h1 class="sidebar-title">My Road Trips</h1>
+            <h1 class="sidebar-title">Mes Road Trips</h1>
 
             <a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'add']) ?>" class="sidebar-create-btn">
-                <i class="material-icons">add_circle</i> Create a Road Trip
+                <i class="material-icons">add_circle</i> Créer un Road Trip
             </a>
 
             <nav class="profil-nav">
                 <ul>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?>" class="active">My Road Trips</a></li>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'publicRoadtrips']) ?>">Public Road Trips</a></li>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'profile']) ?>">Settings</a></li>
-                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="logout">Logout</a></li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?>" class="active">Mes Road-Trips</a></li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'publicRoadtrips']) ?>">Road-Trips publics</a></li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'profile']) ?>">Paramètres du compte</a></li>
+                    <li><a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'logout']) ?>" class="logout">Déconnexion</a></li>
                 </ul>
             </nav>
         </aside>
@@ -39,8 +39,8 @@ $this->assign('mainClass', '');
 
             <?php if ($roadtrips->isEmpty()) : ?>
                 <div class="dashboard-empty-state">
-                    <p class="empty-text-lead">You haven't created any road trips yet.</p>
-                    <p>Use the button in the left menu to get started!</p>
+                    <p class="empty-text-lead">Vous n'avez pas encore créé de road trip.</p>
+                    <p>Utilisez le bouton dans le menu de gauche pour commencer !</p>
                 </div>
             <?php else : ?>
                 <div class="roadtrip-grid">
@@ -50,12 +50,12 @@ $this->assign('mainClass', '');
                             <div class="card-badges">
                                 <?php
                                 $cssClass = $rt->is_completed ? 'statut-termine' : 'statut-brouillon';
-                                $statusText = $rt->is_completed ? 'Completed' : 'Draft';
+                                $statusText = $rt->is_completed ? 'Terminé' : 'Brouillon';
                                 ?>
                                 <span class="badge-statut <?= $cssClass ?>"><?= $statusText ?></span>
                             </div>
 
-                            <?= $this->Html->image($rt->cover_image, ['alt' => 'Road trip cover photo', 'class' => 'roadtrip-photo']) ?>
+                            <?= $this->Html->image($rt->cover_image, ['alt' => 'Photo du road trip', 'class' => 'roadtrip-photo']) ?>
 
                             <div class="card-body">
                                 <h3><?= h($rt->title) ?></h3>
@@ -66,16 +66,16 @@ $this->assign('mainClass', '');
                                 <?= $this->Html->link(
                                     '<i class="material-icons">visibility</i>',
                                     ['controller' => 'Roadtrips', 'action' => 'view', $rt->id],
-                                    ['escape' => false, 'class' => 'action-btn view', 'title' => 'View']
+                                    ['escape' => false, 'class' => 'action-btn view', 'title' => 'Voir']
                                 ) ?>
 
                                 <?= $this->Html->link(
                                     '<i class="material-icons">edit</i>',
                                     ['action' => 'edit', $rt->id],
-                                    ['escape' => false, 'class' => 'action-btn edit', 'title' => 'Edit']
+                                    ['escape' => false, 'class' => 'action-btn edit', 'title' => 'Modifier']
                                 ) ?>
 
-                                <a href="<?= $this->Url->build(['action' => 'share', $rt->id]) ?>" class="action-btn share" title="Share">
+                                <a href="<?= $this->Url->build(['action' => 'share', $rt->id]) ?>" class="action-btn share" title="Partager">
                                     <i class="material-icons">share</i>
                                 </a>
 
@@ -85,8 +85,8 @@ $this->assign('mainClass', '');
                                     [
                                         'escape' => false,
                                         'class' => 'action-btn delete',
-                                        'title' => 'Delete',
-                                        'confirm' => 'Do you really want to delete this road trip?'
+                                        'title' => 'Supprimer',
+                                        'confirm' => 'Voulez-vous vraiment supprimer ce road trip ?'
                                     ]
                                 ) ?>
                             </div>
@@ -101,13 +101,13 @@ $this->assign('mainClass', '');
     <div class="share-modal active" id="shareModal">
         <div class="share-modal-content">
             <span class="share-modal-close" onclick="closeShareModal()">&times;</span>
-            <h2>Share your road trip</h2>
-            <p>Copy this link to share your road trip:</p>
+            <h2>Partager votre road trip</h2>
+            <p>Copiez ce lien pour partager votre road trip :</p>
             <div class="share-url-container">
                 <input type="text" class="share-url-input" id="shareUrl" value="<?= h($shareUrl) ?>" readonly>
-                <button class="copy-btn" onclick="copyShareUrl()">Copy</button>
+                <button class="copy-btn" onclick="copyShareUrl()">Copier</button>
             </div>
-            <div class="copy-success" id="copySuccess">Link copied!</div>
+            <div class="copy-success" id="copySuccess">Lien copié !</div>
         </div>
     </div>
 <?php endif; ?>

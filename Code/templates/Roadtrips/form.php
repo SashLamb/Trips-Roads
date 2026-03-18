@@ -7,7 +7,7 @@
  * @var string $userDefaultCity
  */
 
-$this->assign('title', $isEditMode ? 'Edit RoadTrip' : 'Create RoadTrip');
+$this->assign('title', $isEditMode ? 'Modifier le RoadTrip' : 'Création de RoadTrip');
 $this->assign('mainClass', '');
 ?>
 
@@ -33,41 +33,41 @@ $this->assign('mainClass', '');
     const CSRF_TOKEN = "<?= $this->request->getAttribute('csrfToken') ?>";
 </script>
 
-<h1 class="roadtrip-main-title"><?= $isEditMode ? "Edit my RoadTrip" : "Create a RoadTrip" ?></h1>
+<h1 class="roadtrip-main-title"><?= $isEditMode ? "Modifier mon RoadTrip" : "Créer un RoadTrip" ?></h1>
 
 <div class="main-container">
     <div class="sidebar">
         <div class="search-container">
             <div class="region-selector-container">
-                <label for="regionSelect">🌍 Search area:</label>
-                <small class="help-text-small">Centers the map and filters suggested cities.</small>
+                <label for="regionSelect">🌍 Zone de recherche :</label>
+                <small class="help-text-small">Centre la carte et filtre les villes suggérées.</small>
                 <select id="regionSelect" class="full-width-input margin-bottom">
                     <option value="europe" <?= (isset($roadtrip->place) && $roadtrip->place === 'europe') ? 'selected' : '' ?>>Europe</option>
-                    <option value="america" <?= (isset($roadtrip->place) && $roadtrip->place === 'america') ? 'selected' : '' ?>>North America (USA, Canada, Mexico)</option>
+                    <option value="america" <?= (isset($roadtrip->place) && $roadtrip->place === 'america') ? 'selected' : '' ?>>Amérique du Nord (USA, Canada, Mexique)</option>
                 </select>
             </div>
 
             <div id="legend" class="block-display">
-                <h3>Itinerary:</h3>
+                <h3>Itinéraire :</h3>
                 <ul id="legendList" class="no-bullets padding-zero"></ul>
                 <div id="newBlockForm" class="hidden"></div>
             </div>
 
             <div id="actionsContainer" class="margin-top-small">
-                <button type="button" id="btnAddSegment" class="full-width-btn">+ Add a trip</button>
+                <button type="button" id="btnAddSegment" class="full-width-btn">+ Ajouter un trajet</button>
             </div>
 
             <hr>
         </div>
 
         <div id="saveContainer">
-            <h3>Save & Settings</h3>
+            <h3>Sauvegarde & Paramètres</h3>
 
             <?= $this->Form->create($roadtrip, ['type' => 'file', 'id' => 'roadtripForm']) ?>
 
             <?= $this->Form->control('title', [
                 'id' => 'roadtripTitle',
-                'placeholder' => 'RoadTrip Title',
+                'placeholder' => 'Titre du RoadTrip',
                 'label' => false,
                 'class' => 'full-width-input margin-bottom'
             ]) ?>
@@ -75,7 +75,7 @@ $this->assign('mainClass', '');
             <?= $this->Form->control('description', [
                 'id' => 'roadtripDescription',
                 'type' => 'textarea',
-                'placeholder' => 'Description (optional)',
+                'placeholder' => 'Description (optionnelle)',
                 'label' => false,
                 'class' => 'full-width-input margin-bottom'
             ]) ?>
@@ -84,11 +84,11 @@ $this->assign('mainClass', '');
                 <?= $this->Form->control('status', [
                     'id' => 'roadtripStatut',
                     'type' => 'select',
-                    'label' => ['text' => 'Project progress:', 'class' => 'bold-label'],
+                    'label' => ['text' => 'Avancement du projet :', 'class' => 'bold-label'],
                     'class' => 'full-width-input',
                     'options' => [
-                        'draft' => '📝 Work in progress (Draft)',
-                        'completed' => '✅ Completed project'
+                        'draft' => '📝 En cours de création (Brouillon)',
+                        'completed' => '✅ Projet terminé'
                     ],
                     'default' => $roadtrip->status ?? 'draft'
                 ]) ?>
@@ -98,26 +98,26 @@ $this->assign('mainClass', '');
                 <?= $this->Form->control('visibility', [
                     'id' => 'roadtripVisibilite',
                     'type' => 'select',
-                    'label' => ['text' => 'Who can see this RoadTrip?', 'class' => 'bold-label'],
+                    'label' => ['text' => 'Qui peut voir ce RoadTrip ?', 'class' => 'bold-label'],
                     'class' => 'full-width-input',
                     'options' => [
-                        'private' => '🔒 Private (Only me)',
-                        'friends' => '👥 Friends',
-                        'public' => '🌍 Public (Everyone)'
+                        'private' => '🔒 Privé (Moi seul)',
+                        'friends' => '👥 Amis',
+                        'public' => '🌍 Public (Tout le monde)'
                     ],
                     'default' => $roadtrip->visibility ?? 'private'
                 ]) ?>
                 <small class="help-text">
-                    * You can share a draft in "Friends" or "Public" mode.
+                    * Vous pouvez partager un brouillon en mode "Amis" ou "Public".
                 </small>
             </div>
 
             <div class="image-upload-container margin-bottom">
-                <label class="bold-label">Road Trip cover:</label>
+                <label class="bold-label">Couverture du Road Trip :</label>
                 <?php if ($isEditMode && !empty($roadtrip->photo_url)): ?>
                     <div class="current-image-wrapper">
-                        <?= $this->Html->image('roadtrips/' . $roadtrip->photo_url, ['class' => 'preview-thumbnail', 'alt' => 'Current cover']) ?>
-                        <br><small>Current image</small>
+                        <?= $this->Html->image('roadtrips/' . $roadtrip->photo_url, ['class' => 'preview-thumbnail', 'alt' => 'Couverture actuelle']) ?>
+                        <br><small>Image actuelle</small>
                     </div>
                 <?php endif; ?>
 
@@ -131,7 +131,7 @@ $this->assign('mainClass', '');
 
             <?= $this->Form->hidden('trajets', ['id' => 'trajetsJsonData']) ?>
 
-            <?= $this->Form->button($isEditMode ? "Update" : "Save", [
+            <?= $this->Form->button($isEditMode ? "Mettre à jour" : "Sauvegarder", [
                 'type' => 'submit',
                 'id' => 'saveRoadtripBtn',
                 'class' => 'submit-btn full-width-btn margin-top-small'
@@ -142,13 +142,13 @@ $this->assign('mainClass', '');
     </div>
 
     <div class="segment-form-container hidden" id="segmentFormContainer">
-        <span id="closeSegmentForm" class="close-segment-btn" title="Close">✖</span>
-        <h3 id="segmentTitle">Plan stops</h3>
+        <span id="closeSegmentForm" class="close-segment-btn" title="Fermer">✖</span>
+        <h3 id="segmentTitle">Planifier les étapes</h3>
         <div id="subEtapesContainer"></div>
 
         <div class="subEtape-buttons">
-            <button type="button" id="addSubEtape">+ Add a sub-step</button>
-            <button type="button" id="saveSegment">Validate sub-steps</button>
+            <button type="button" id="addSubEtape">+ Ajouter une sous-étape</button>
+            <button type="button" id="saveSegment">Valider les sous-étapes</button>
         </div>
     </div>
 
@@ -163,45 +163,45 @@ $this->assign('mainClass', '');
             <span class="legend-color-indicator"></span>
 
             <div class="transport-options">
-                <button type="button" class="transport-btn active" data-mode="Voiture" title="By Car">🚗</button>
-                <button type="button" class="transport-btn" data-mode="Velo" title="By Bike">🚲</button>
-                <button type="button" class="transport-btn" data-mode="Marche" title="On Foot">🚶</button>
+                <button type="button" class="transport-btn active" data-mode="Voiture" title="En Voiture">🚗</button>
+                <button type="button" class="transport-btn" data-mode="Velo" title="À Vélo">🚲</button>
+                <button type="button" class="transport-btn" data-mode="Marche" title="À Pied">🚶</button>
             </div>
-            <button type="button" class="settings-btn" title="Trip options">⚙️</button>
+            <button type="button" class="settings-btn" title="Options de trajet">⚙️</button>
             <button type="button" class="toggleSousEtapes legend-toggle-btn">▼</button>
-            <button type="button" class="remove-segment-btn" title="Delete this trip">✖</button>
+            <button type="button" class="remove-segment-btn" title="Supprimer ce trajet">✖</button>
         </div>
 
         <div class="legend-date-container">
-            <label>Departure on:</label>
+            <label>Départ le :</label>
             <input type="date" class="legend-date-input" required>
-            <label>at:</label>
+            <label>à :</label>
             <input type="time" class="legend-time-input" value="08:00" required>
         </div>
 
         <div class="route-preferences hidden">
             <label class="pref-item">
                 <input type="checkbox" class="pref-checkbox" data-pref="exclude-tolls">
-                <span>No tolls</span>
+                <span>Sans péages</span>
             </label>
             <label class="pref-item">
                 <input type="checkbox" class="pref-checkbox" data-pref="exclude-motorways">
-                <span>No motorways</span>
+                <span>Sans autoroutes</span>
             </label>
         </div>
 
-        <button type="button" class="modifierSousEtapes">Add/Edit Sub-steps</button>
+        <button type="button" class="modifierSousEtapes">Ajouter/Modifier Sous-étapes</button>
         <ul class="sousEtapesList block-display"></ul>
     </li>
 </template>
 
 <template id="template-sub-etape">
     <div class="subEtape sub-etape-form">
-        <input type="text" placeholder="Place or city name" class="subEtapeNom">
+        <input type="text" placeholder="Nom du lieu ou ville" class="subEtapeNom">
 
         <div class="subEtapeEditorContainer"></div>
 
-        <label class="small-bold-label">Time spent on site (estimation)</label>
+        <label class="small-bold-label">Temps passé sur place (estimation)</label>
         <input type="time" class="subEtapeHeure" required>
 
         <button type="button" class="removeSubEtapeBtn sub-etape-remove-btn">✖</button>
@@ -209,5 +209,5 @@ $this->assign('mainClass', '');
 </template>
 
 <div id="imageModal" class="image-modal">
-    <?= $this->Html->image('', ['id' => 'imageModalContent', 'class' => 'image-modal-content', 'alt' => 'Enlarged photo']) ?>
+    <?= $this->Html->image('', ['id' => 'imageModalContent', 'class' => 'image-modal-content', 'alt' => 'Photo agrandie']) ?>
 </div>

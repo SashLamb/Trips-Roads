@@ -2,7 +2,7 @@
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Roadtrip> $roadtrips
- * @var array $favorisIds
+ * @var array $favoriteIds
  * @var string|null $userId
  * @var \App\Model\Entity\User $user
  * @var \App\Model\Entity\Comment $newComment
@@ -23,7 +23,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                 $userName = h($user->username);
             } else {
                 $avatarUrl = $this->Url->webroot('img/User.png');
-                $userName = "Visitor";
+                $userName = "Visiteur";
             }
             ?>
             <div class="avatar-circle small avatar-fallback">
@@ -37,11 +37,11 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
             </h3>
         </div>
 
-        <h1 class="sidebar-title">Public Road Trips</h1>
+        <h1 class="sidebar-title">Road Trips Publics</h1>
 
         <?php if (isset($userId)): ?>
             <?= $this->Html->link(
-                '<i class="material-icons">add_circle</i> Create a Road Trip',
+                '<i class="material-icons">add_circle</i> Créer un Road Trip',
                 ['controller' => 'Roadtrips', 'action' => 'add'],
                 ['escape' => false, 'class' => 'sidebar-create-btn']
             ) ?>
@@ -50,14 +50,14 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
         <nav class="profil-nav">
             <ul>
                 <?php if (isset($userId)): ?>
-                    <li><?= $this->Html->link('My Road Trips', ['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?></li>
+                    <li><?= $this->Html->link('Mes Road-Trips', ['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?></li>
                 <?php endif; ?>
-                <li><?= $this->Html->link('Public Road Trips', ['controller' => 'Roadtrips', 'action' => 'publicRoadtrips'], ['class' => 'active']) ?></li>
+                <li><?= $this->Html->link('Road-Trips Publics', ['controller' => 'Roadtrips', 'action' => 'publicRoadtrips'], ['class' => 'active']) ?></li>
                 <?php if (isset($userId)): ?>
-                    <li><?= $this->Html->link('Settings', ['controller' => 'Users', 'action' => 'profile']) ?></li>
-                    <li><?= $this->Html->link('Logout', ['controller' => 'Users', 'action' => 'logout'], ['class' => 'logout']) ?></li>
+                    <li><?= $this->Html->link('Paramètres du compte', ['controller' => 'Users', 'action' => 'profile']) ?></li>
+                    <li><?= $this->Html->link('Déconnexion', ['controller' => 'Users', 'action' => 'logout'], ['class' => 'logout']) ?></li>
                 <?php else: ?>
-                    <li><?= $this->Html->link('Login', ['controller' => 'Users', 'action' => 'login']) ?></li>
+                    <li><?= $this->Html->link('Se connecter', ['controller' => 'Users', 'action' => 'login']) ?></li>
                 <?php endif; ?>
             </ul>
         </nav>
@@ -67,7 +67,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
         <?= $this->Flash->render() ?>
 
         <?php if ($roadtrips->isEmpty()) : ?>
-            <p class="text-center-empty">No public road trips at the moment.</p>
+            <p class="text-center-empty">Aucun road trip public pour le moment.</p>
         <?php else : ?>
 
             <div class="roadtrip-grid">
@@ -75,7 +75,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
 
                     <?php
                     $cssClass = $rt->is_completed ? 'statut-termine' : 'statut-brouillon';
-                    $statusLabel = $rt->is_completed ? 'Completed' : 'In progress';
+                    $statusLabel = $rt->is_completed ? 'Terminé' : 'En cours';
                     $isOwner = $currentUser && $currentUser->getIdentifier() === $rt->user_id;
                     $commentsCount = !empty($rt->comments) ? count($rt->comments) : 0;
                     ?>
@@ -86,13 +86,13 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                             <span class="badge-statut <?= $cssClass ?>"><?= $statusLabel ?></span>
                         </div>
 
-                        <?= $this->Html->image($rt->cover_image, ['alt' => 'Roadtrip cover photo', 'class' => 'roadtrip-photo']) ?>
+                        <?= $this->Html->image($rt->cover_image, ['alt' => 'Photo de couverture', 'class' => 'roadtrip-photo']) ?>
 
                         <div class="card-body">
                             <h3><?= h($rt->title) ?></h3>
                             <p class="card-description"><?= h($this->Text->truncate($rt->description, 100)) ?></p>
                             <div class="creator-info">
-                                Shared by: <strong><?= h($rt->user->username ?? 'Anonymous') ?></strong>
+                                Proposé par : <strong><?= h($rt->user->username ?? 'Anonyme') ?></strong>
                             </div>
                         </div>
 
@@ -100,7 +100,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                             <?= $this->Html->link(
                                 '<i class="material-icons">visibility</i>',
                                 ['action' => 'view', $rt->id],
-                                ['escape' => false, 'class' => 'action-btn view', 'title' => 'View']
+                                ['escape' => false, 'class' => 'action-btn view', 'title' => 'Voir']
                             ) ?>
 
                             <?php if ($currentUser): ?>
@@ -108,18 +108,18 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                     <?= $this->Form->postLink(
                                         '<i class="material-icons">favorite</i>',
                                         ['controller' => 'Favorites', 'action' => 'delete', $rt->id],
-                                        ['escape' => false, 'title' => 'Remove from favorites']
+                                        ['escape' => false, 'title' => 'Retirer des favoris']
                                     ) ?>
                                 <?php else: ?>
                                     <?= $this->Form->postLink(
                                         '<i class="material-icons">favorite_border</i>',
                                         ['controller' => 'Favorites', 'action' => 'add', '?' => ['roadtrip_id' => $rt->id]],
-                                        ['escape' => false, 'title' => 'Add to favorites']
+                                        ['escape' => false, 'title' => 'Ajouter aux favoris']
                                     ) ?>
                                 <?php endif; ?>
                             <?php endif; ?>
 
-                            <button type="button" class="action-btn" onclick="openRoadtripModal('modalAvis-<?= $rt->id ?>')" title="View reviews">
+                            <button type="button" class="action-btn" onclick="openRoadtripModal('modalAvis-<?= $rt->id ?>')" title="Voir les avis">
                                 <i class="material-icons">rate_review</i>
                                 <?php if ($commentsCount > 0): ?>
                                     <span style="font-size: 0.9em; font-weight: bold; margin-left: 3px;"><?= $commentsCount ?></span>
@@ -127,7 +127,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                             </button>
 
                             <?php if ($currentUser): ?>
-                                <button type="button" class="action-btn" onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')" title="Leave a review">
+                                <button type="button" class="action-btn" onclick="openRoadtripModal('modalComment-<?= $rt->id ?>')" title="Laisser un avis">
                                     <i class="material-icons">add_comment</i>
                                 </button>
                             <?php endif; ?>
@@ -135,7 +135,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                             <button type="button" class="action-btn js-export-btn"
                                     data-gpx="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportGpx', $rt->id]) ?>"
                                     data-pdf="<?= $this->Url->build(['controller' => 'Roadtrips', 'action' => 'exportPdf', $rt->id]) ?>"
-                                    title="Export to GPX and PDF">
+                                    title="Exporter en GPX et PDF">
                                 <i class="material-icons">file_download</i>
                             </button>
 
@@ -143,7 +143,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 <?= $this->Form->postLink(
                                     '<i class="material-icons">delete</i>',
                                     ['controller' => 'Roadtrips', 'action' => 'delete', $rt->id],
-                                    ['confirm' => 'Delete this road trip?', 'escape' => false, 'class' => 'action-btn btn-delete', 'title' => 'Delete']
+                                    ['confirm' => 'Supprimer ce road trip ?', 'escape' => false, 'class' => 'action-btn btn-delete', 'title' => 'Supprimer']
                                 ) ?>
                             <?php endif; ?>
                         </div>
@@ -156,18 +156,18 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                 <div id="modalAvis-<?= $rt->id ?>" class="custom-modal">
                     <div class="modal-content modal-avis">
                         <div class="modal-header">
-                            <h3><i class="material-icons">rate_review</i> Reviews — <?= h($rt->title) ?></h3>
-                            <button type="button" class="modal-close" onclick="closeRoadtripModal('modalAvis-<?= $rt->id ?>')" aria-label="Close">&times;</button>
+                            <h3><i class="material-icons">rate_review</i> Avis — <?= h($rt->title) ?></h3>
+                            <button type="button" class="modal-close" onclick="closeRoadtripModal('modalAvis-<?= $rt->id ?>')" aria-label="Fermer">&times;</button>
                         </div>
 
                         <div class="modal-body">
                             <?php if (empty($rt->comments)): ?>
                                 <div class="no-comments">
                                     <i class="material-icons">chat_bubble_outline</i>
-                                    <p>No reviews yet.</p>
+                                    <p>Aucun avis pour le moment.</p>
                                     <?php if ($currentUser): ?>
                                         <button type="button" class="btn-switch-to-comment" onclick="closeRoadtripModal('modalAvis-<?= $rt->id ?>'); openRoadtripModal('modalComment-<?= $rt->id ?>')">
-                                            Be the first to leave a review!
+                                            Soyez le premier à laisser un avis !
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -179,7 +179,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                             <div class="comment-meta">
                                                 <span class="comment-author">
                                                     <i class="material-icons">account_circle</i>
-                                                    <?= h($comment->user->username ?? 'Anonymous') ?>
+                                                    <?= h($comment->user->username ?? 'Anonyme') ?>
                                                 </span>
                                                 <?php if (!empty($comment->rating)): ?>
                                                     <span class="comment-rating">
@@ -191,7 +191,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                                     <?= $this->Form->postLink(
                                                         '<i class="material-icons">delete</i>',
                                                         ['controller' => 'Comments', 'action' => 'delete', $comment->id],
-                                                        ['confirm' => 'Delete this review?', 'escape' => false, 'class' => 'comment-delete-btn', 'title' => 'Delete review']
+                                                        ['confirm' => 'Supprimer cet avis ?', 'escape' => false, 'class' => 'comment-delete-btn', 'title' => 'Supprimer l\'avis']
                                                     ) ?>
                                                 <?php endif; ?>
                                             </div>
@@ -202,7 +202,7 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                                 <?php if ($currentUser): ?>
                                     <div class="modal-footer-action">
                                         <button type="button" class="btn-switch-to-comment" onclick="closeRoadtripModal('modalAvis-<?= $rt->id ?>'); openRoadtripModal('modalComment-<?= $rt->id ?>')">
-                                            <i class="material-icons">add_comment</i> Add my review
+                                            <i class="material-icons">add_comment</i> Ajouter mon avis
                                         </button>
                                     </div>
                                 <?php endif; ?>
@@ -215,40 +215,40 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                     <div id="modalComment-<?= $rt->id ?>" class="custom-modal">
                         <div class="modal-content modal-comment-form">
                             <div class="modal-header">
-                                <h3><i class="material-icons">add_comment</i> Leave a review</h3>
-                                <button type="button" class="modal-close" onclick="closeRoadtripModal('modalComment-<?= $rt->id ?>')" aria-label="Close">&times;</button>
+                                <h3><i class="material-icons">add_comment</i> Laisser un avis</h3>
+                                <button type="button" class="modal-close" onclick="closeRoadtripModal('modalComment-<?= $rt->id ?>')" aria-label="Fermer">&times;</button>
                             </div>
 
                             <div class="modal-body">
                                 <p class="modal-trip-title">
-                                    Road trip: <strong><?= h($rt->title) ?></strong>
+                                    Road trip : <strong><?= h($rt->title) ?></strong>
                                 </p>
 
                                 <?= $this->Form->create($newComment, ['url' => ['controller' => 'Comments', 'action' => 'add']]) ?>
                                 <?= $this->Form->hidden('roadtrip_id', ['value' => $rt->id]) ?>
 
                                 <div class="form-group rating-group">
-                                    <label class="form-label">Your rating</label>
+                                    <label class="form-label">Votre note</label>
                                     <div class="modern-star-rating">
                                         <?php for ($i = 5; $i >= 1; $i--): ?>
                                             <input type="radio" id="star<?= $i ?>-<?= $rt->id ?>" name="rating" value="<?= $i ?>" required/>
-                                            <label for="star<?= $i ?>-<?= $rt->id ?>" title="<?= $i ?> stars">★</label>
+                                            <label for="star<?= $i ?>-<?= $rt->id ?>" title="<?= $i ?> étoiles">★</label>
                                         <?php endfor; ?>
                                     </div>
                                 </div>
 
                                 <?= $this->Form->control('body', [
                                     'type' => 'textarea',
-                                    'label' => ['text' => 'Comment', 'class' => 'form-label'],
+                                    'label' => ['text' => 'Commentaire', 'class' => 'form-label'],
                                     'class' => 'form-textarea',
-                                    'placeholder' => 'Share your experience...',
+                                    'placeholder' => 'Partagez votre expérience...',
                                     'rows' => 4
                                 ]) ?>
 
                                 <div class="form-actions">
-                                    <button type="button" class="btn-cancel-modal" onclick="closeRoadtripModal('modalComment-<?= $rt->id ?>')">Cancel</button>
+                                    <button type="button" class="btn-cancel-modal" onclick="closeRoadtripModal('modalComment-<?= $rt->id ?>')">Annuler</button>
 
-                                    <?= $this->Form->button('<i class="material-icons">send</i> Publish', ['type' => 'submit', 'class' => 'btn-submit-comment', 'escapeTitle' => false]) ?>
+                                    <?= $this->Form->button('<i class="material-icons">send</i> Publier', ['type' => 'submit', 'class' => 'btn-submit-comment', 'escapeTitle' => false]) ?>
                                 </div>
                                 <?= $this->Form->end() ?>
                             </div>
