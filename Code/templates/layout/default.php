@@ -207,11 +207,11 @@ $mainClass = $this->fetch('mainClass', 'main-index');
         </div>
         <ul class="footer-links">
             <li><?= $this->Html->link('Contact', ['controller' => 'PageLink', 'action' => 'contact'], ['class' => 'un']) ?></li>
-            <li><?= $this->Html->link('CGU', ['controller' => 'PageLink', 'action' => 'cgu'], ['class' => 'deux']) ?></li>
-            <li><?= $this->Html->link('Politique de confidentialité', ['controller' => 'PageLink', 'action' => 'politique'], ['class' => 'trois']) ?></li>
+            <li><?= $this->Html->link('CGU', ['controller' => 'PageLink', 'action' => 'terms'], ['class' => 'deux']) ?></li>
+            <li><?= $this->Html->link('Politique de confidentialité', ['controller' => 'PageLink', 'action' => 'privacy'], ['class' => 'trois']) ?></li>
             <li><?= $this->Html->link('FAQ', ['controller' => 'PageLink', 'action' => 'faq'], ['class' => 'quatre']) ?></li>
             <li><?= $this->Html->link('Road-Trip', ['controller' => 'Roadtrips', 'action' => 'index'], ['class' => 'cinq']) ?></li>
-            <li><?= $this->Html->link('Gestion des cookies', ['controller' => 'PageLink', 'action' => 'cookie'], ['class' => 'six']) ?></li>
+            <li><?= $this->Html->link('Gestion des cookies', ['controller' => 'PageLink', 'action' => 'cookies'], ['class' => 'six']) ?></li>
         </ul>
     </div>
 </footer>

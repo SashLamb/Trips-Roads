@@ -247,12 +247,6 @@ function createNumberedMarker(map, point, number, color, popupText, offset, clus
  * @function toggleTrajet
  * @param {string|number} id - Trip ID
  */
-/**
- * Toggles the visibility of trip details and local maps.
- * Hides global map when a specific trip is active.
- * @function toggleTrajet
- * @param {string|number} id - Trip ID
- */
 window.toggleTrajet = function(id) {
     const content = document.getElementById('sub-steps-' + id);
     const card = document.getElementById('card-' + id);
