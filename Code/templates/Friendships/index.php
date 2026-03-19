@@ -4,7 +4,7 @@
         <h2>Mes Amis</h2>
 
         <?php if (!empty($message)): ?>
-            <p class="message" style="text-align:center;color:var(--orange);font-weight:bold;">
+            <p class="message">
                 <?= h($message) ?>
             </p>
         <?php endif; ?>
@@ -45,13 +45,12 @@
                                         'Ajouter',
                                         ['action' => 'add', $u->id],
                                         [
-                                            'class' => 'button',
+                                            'class' => 'btn-message',
                                             'confirm' => 'Envoyer une demande d’ami ?'
                                         ]
                                     ) ?>
                                 <?php elseif ($u->friendship_status === 'pending'): ?>
-                                    <span>Demande envoyée</span>
-                                <?php elseif ($u->friendship_status === 'accepted'): ?>
+                                    <span class="status-label">Demande envoyée</span>                                <?php elseif ($u->friendship_status === 'accepted'): ?>
                                     <span>Ami</span>
                                 <?php endif; ?>
                             </li>
