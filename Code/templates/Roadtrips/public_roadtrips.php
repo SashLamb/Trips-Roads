@@ -12,7 +12,7 @@ $this->assign('mainClass', 'dashboard-page');
 $currentUser = $this->request->getAttribute('identity');
 $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === 'admin';
 ?>
-
+<?php $this->Html->script('publicRoad', ['block' => true]); ?>
 <div class="dashboard-container <?= $isAdmin ? 'admin-mode' : '' ?>">
 
     <aside class="profil-sidebar">
