@@ -1,3 +1,11 @@
+<?php
+/**
+ * @var \App\View\AppView $this
+ * @var int $userId
+ */
+$this->assign('title', 'Messagerie');
+?>
+
 <main class="main-index">
     <div class="messagerie-container">
         <div class="conversations-list">
