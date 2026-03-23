@@ -4,16 +4,13 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Listen for clicks on all export buttons
     document.querySelectorAll('.js-export-btn').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
             e.preventDefault(); // Prevent the default anchor behavior
 
-            // Retrieve the URLs from the data attributes
             const gpxUrl = this.getAttribute('data-gpx');
             const pdfUrl = this.getAttribute('data-pdf');
 
-            // Trigger the downloads if both URLs are present
             if (gpxUrl && pdfUrl) {
                 downloadExportPack(gpxUrl, pdfUrl);
             }
@@ -33,7 +30,6 @@ function downloadFile(url) {
     iframe.src = url;
     document.body.appendChild(iframe);
 
-    // Clean up the DOM after the download starts
     setTimeout(() => {
         document.body.removeChild(iframe);
     }, 5000);
@@ -49,7 +45,6 @@ function downloadFile(url) {
 function downloadExportPack(gpxUrl, pdfUrl) {
     downloadFile(gpxUrl);
 
-    // Add a 1-second delay for the second file to prevent browser blocking
     setTimeout(() => {
         downloadFile(pdfUrl);
     }, 1000);
