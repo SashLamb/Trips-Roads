@@ -1,40 +1,61 @@
-<main class="main-index">
-    <div class="messagerie-container">
-        <div class="conversations-list">
-            <h2>Mes messages</h2>
-            <?= $this->cell('Message', [$userId, $amiId]) ?>
-        </div>
+<?php
+/**
+ * @var \App\View\AppView $this
+ * @var iterable<\App\Model\Entity\Message> $messages
+ * @var \App\Model\Entity\User $friend
+ * @var int $userId
+ * @var int $friendId
+ */
+$this->assign('title', 'Discussion avec ' . h($friend->first_name));
+$this->assign('mainClass', 'main-index');
+?>
 
-        <div class="chat-area">
-            <?php if (!empty($ami)): ?>
-                <div class="chat-header">
-                    <div class="chat-user-info">
-                        <?php if (!empty($ami->profile_picture)): ?>
-                            <img src="/uploads/pp/<?= h($ami->profile_picture) ?>">
-                        <?php else: ?>
-                            <div class="avatar-placeholder"><?= strtoupper(substr($ami->prenom, 0, 1)) ?></div>
-                        <?php endif; ?>
-                        <span><?= h($ami->prenom . ' ' . $ami->nom) ?></span>
-                    </div>
-                </div>
+<div class="messagerie-container">
 
-                <div class="messages-container" id="messagesContainer">
-                    <?php foreach ($messages as $msg): ?>
-                        <div class="message <?= ($msg->sender_id == $userId) ? 'sent' : 'received' ?>">
-                            <div class="message-content">
-                                <p><?= nl2br(h($msg->content)) ?></p>
-                                <span class="message-time"><?= $msg->created->format('H:i') ?></span>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-
-                <?= $this->Form->create(null, ['url' => ['action' => 'sendMessage'], 'class' => 'message-form']) ?>
-                <?= $this->Form->hidden('ami_id', ['value' => $amiId]) ?>
-                <?= $this->Form->control('body', ['type' => 'textarea', 'label' => false, 'placeholder' => 'Écrivez...', 'required' => true]) ?>
-                <button type="submit"><i class="material-icons">send</i></button>
-                <?= $this->Form->end() ?>
-            <?php endif; ?>
-        </div>
+    <div class="conversations-list">
+        <h2>Mes messages</h2>
+        <?= $this->cell('Message', [$userId, $friendId]) ?>
     </div>
-</main>
+
+    <div class="chat-area">
+        <?php if (!empty($friend)): ?>
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <?php if (!empty($friend->profile_picture)): ?>
+                        <img src="/uploads/pp/<?= h($friend->profile_picture) ?>" alt="Avatar">
+                    <?php else: ?>
+                        <div class="avatar-placeholder"><?= strtoupper(substr($friend->first_name, 0, 1)) ?></div>
+                    <?php endif; ?>
+
+                    <span><?= h($friend->first_name . ' ' . $friend->last_name) ?></span>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <?php foreach ($messages as $msg): ?>
+                    <div class="message <?= ($msg->sender_id == $userId) ? 'sent' : 'received' ?>">
+                        <div class="message-content">
+                            <p><?= nl2br(h($msg->content)) ?></p>
+                            <span class="message-time"><?= $msg->created->format('H:i') ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <?= $this->Form->create(null, ['url' => ['action' => 'sendMessage'], 'class' => 'message-form']) ?>
+
+            <?= $this->Form->hidden('friend_id', ['value' => $friendId]) ?>
+
+            <?= $this->Form->control('body', [
+            'type' => 'textarea',
+            'label' => false,
+            'placeholder' => 'Écrivez votre message...',
+            'required' => true
+        ]) ?>
+
+            <button type="submit" title="Envoyer"><i class="material-icons">send</i></button>
+
+            <?= $this->Form->end() ?>
+        <?php endif; ?>
+    </div>
+</div>
