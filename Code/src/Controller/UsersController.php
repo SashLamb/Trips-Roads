@@ -8,6 +8,9 @@ use Cake\Http\Cookie\Cookie;
 use Cake\I18n\FrozenTime;
 use League\OAuth2\Client\Provider\Google;
 use Cake\Core\Configure;
+use Cake\Mailer\Mailer;
+use Cake\Utility\Security;
+use Cake\Routing\Router;
 
 /**
  * Users Controller
@@ -37,7 +40,7 @@ class UsersController extends AppController
     public function beforeFilter(EventInterface $event)
     {
         parent::beforeFilter($event);
-        $this->Authentication->addUnauthenticatedActions(['login', 'add', 'accessibility', 'loginGoogle', 'callbackGoogle']);
+        $this->Authentication->addUnauthenticatedActions(['login', 'add', 'accessibility', 'loginGoogle', 'callbackGoogle', 'forgotPassword', 'resetPassword']);
     }
 
     /**
@@ -263,4 +266,59 @@ class UsersController extends AppController
 
         $this->set(compact('user', 'isDarkMode', 'isVisionMode', 'colorBlindType'));
     }
+
+    public function forgotPassword()
+    {
+        if ($this->request->is('post')) {
+            $email = $this->request->getData('email');
+            $user = $this->Users->find()->where(['email' => $email])->first();
+
+            if ($user) {
+                $user->token = Security::hash(Security::randomBytes(32), 'sha256', false);
+                $user->token_expiration = new FrozenTime('+1 hour');
+
+                if ($this->Users->save($user)) {
+                    $mailer = new Mailer('default');
+                    $mailer->setTo($user->email)
+                        ->setSubject('Réinitialisation de votre mot de passe')
+                        ->deliver("Cliquez sur ce lien pour réinitialiser votre mot de passe : " .
+                            Router::url(['action' => 'resetPassword', $user->token], true));
+
+                    $this->Flash->success(__('Un email de récupération vous a été envoyé.'));
+                    return $this->redirect(['action' => 'login']);
+                }
+            }
+            $this->Flash->error(__('Aucun compte n\'est associé à cet email.'));
+        }
+    }
+    public function resetPassword($token = null)
+    {
+        if (!$token) {
+            $this->Flash->error(__('Jeton invalide.'));
+            return $this->redirect(['action' => 'login']);
+        }
+
+        $user = $this->Users->find()
+            ->where(['token' => $token, 'token_expiration >' => new FrozenTime()])
+            ->first();
+
+        if (!$user) {
+            $this->Flash->error(__('Le lien a expiré ou est invalide.'));
+            return $this->redirect(['action' => 'login']);
+        }
+
+        if ($this->request->is(['post', 'put'])) {
+            $user = $this->Users->patchEntity($user, $this->request->getData());
+            $user->token = null;
+            $user->token_expiration = null;
+
+            if ($this->Users->save($user)) {
+                $this->Flash->success(__('Votre mot de passe a été mis à jour.'));
+                return $this->redirect(['action' => 'login']);
+            }
+            $this->Flash->error(__('Erreur lors de la mise à jour.'));
+        }
+        $this->set(compact('user'));
+    }
+
 }
