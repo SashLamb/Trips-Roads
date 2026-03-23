@@ -44,6 +44,7 @@
         'accessibilite',
         'creationRT',
         'favoris',
+        'flash',
         'footer',
         'form',
         'header',
