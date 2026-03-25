@@ -80,6 +80,9 @@ class UsersController extends AppController
             $socialId = $googleUser->getId();
             $name = $googleUser->getName();
 
+            $firstName = $googleUser->getFirstName() ?: 'Utilisateur';
+            $lastName = $googleUser->getLastName() ?: 'Google';
+
             $user = $this->Users->find()->where(['email' => $email])->first();
 
             if ($user) {
@@ -91,8 +94,14 @@ class UsersController extends AppController
             } else {
                 $user = $this->Users->newEmptyEntity();
                 $user->email = $email;
-                $user->username = $name;
-                $user->password = 'SOCIAL_' . uniqid();
+
+                $user->username = $name . '_' . substr(uniqid(), -4);
+
+                $user->first_name = $firstName;
+                $user->last_name = $lastName;
+
+                $user->password = 'Google_' . uniqid() . 'A1!';
+
                 $user->social_id = $socialId;
                 $user->social_provider = 'google';
 
@@ -102,8 +111,8 @@ class UsersController extends AppController
                 }
             }
 
+            // On connecte l'utilisateur
             $this->Authentication->setIdentity($user);
-
             $this->Flash->success('Connexion réussie via Google !');
 
             $target = $this->Authentication->getLoginRedirect() ?? '/';

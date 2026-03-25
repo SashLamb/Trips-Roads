@@ -55,7 +55,13 @@
             </div>
             <?= $this->Form->button('S\'inscrire', ['class' => 'submit-btn']); ?>
             <?= $this->Form->end() ?>
-
+        </div>
+        <div style="margin-top: 20px; text-align: center;">
+            <p>Ou connectez-vous avec :</p>
+            <a href="<?= $this->Url->build(['controller' => 'Users', 'action' => 'loginGoogle']) ?>" class="btn-google">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="G" style="width:20px; vertical-align:middle; margin-right:8px;">
+                Continuer avec Google
+            </a>
         </div>
     </div>
 </div>
