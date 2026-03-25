@@ -172,7 +172,8 @@ button, input, select, textarea, label, p {
     align-items: flex-end; /* Aligne l'avatar en bas de la bulle */
     gap: 10px;
     max-width: 75%;
-    animation: fadeIn 0.3s ease-out;
+    width: fit-content; /* La bulle s'adapte à la taille du texte */
+    margin-bottom: 5px;
 }
 
 @keyframes fadeIn {
@@ -180,16 +181,16 @@ button, input, select, textarea, label, p {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Message reçu (Ami) : à gauche */
 .message.received {
     align-self: flex-start;
-    flex-direction: row; /* Avatar à gauche, texte à droite */
+    flex-direction: row;
+    margin-right: auto;
 }
 
-/* Message envoyé (Toi) : à droite */
 .message.sent {
     align-self: flex-end;
-    flex-direction: row-reverse; /* Avatar à droite, texte à gauche */
+    flex-direction: row-reverse;
+    margin-left: auto;
 }
 
 .message-content {
@@ -198,6 +199,7 @@ button, input, select, textarea, label, p {
     font-size: 15px;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     position: relative;
+    text-align: left;
 }
 
 /* Design bulle Ami */
@@ -290,7 +292,7 @@ button, input, select, textarea, label, p {
 
     /* Classes utilitaires pour basculer la vue sur mobile */
     .mobile-hidden {
-        display: none !important;
+        display: flex !important;
     }
 
     .conversations-list.mobile-full,
@@ -298,9 +300,13 @@ button, input, select, textarea, label, p {
         width: 100%;
         border-right: none;
     }
+    .conversations-list {
+        width: 350px !important;
+        display: flex !important;
+    }
 
     .message {
-        max-width: 88%; /* Les bulles peuvent prendre plus de place sur petit écran */
+        max-width: 88%;
     }
 
     .chat-header {
