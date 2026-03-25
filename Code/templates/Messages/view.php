@@ -11,13 +11,12 @@ $this->assign('mainClass', 'main-index');
 ?>
 
 <div class="messagerie-container">
-
-    <div class="conversations-list">
+    <div class="conversations-list mobile-hidden">
         <h2>Mes messages</h2>
         <?= $this->cell('Message', [$userId, $friendId]) ?>
     </div>
 
-    <div class="chat-area">
+    <div class="chat-area mobile-full">
         <?php if (!empty($friend)): ?>
             <div class="chat-header">
                 <div class="chat-user-info">
@@ -26,7 +25,6 @@ $this->assign('mainClass', 'main-index');
                     <?php else: ?>
                         <div class="avatar-placeholder"><?= strtoupper(substr($friend->first_name, 0, 1)) ?></div>
                     <?php endif; ?>
-
                     <span><?= h($friend->first_name . ' ' . $friend->last_name) ?></span>
                 </div>
             </div>
@@ -34,6 +32,19 @@ $this->assign('mainClass', 'main-index');
             <div class="messages-container" id="messagesContainer">
                 <?php foreach ($messages as $msg): ?>
                     <div class="message <?= ($msg->sender_id == $userId) ? 'sent' : 'received' ?>">
+
+                        <div class="message-avatar">
+                            <?php if ($msg->sender_id == $userId): ?>
+                                <div class="avatar-placeholder-small" style="background: var(--bleu_fonce);">M</div>
+                            <?php else: ?>
+                                <?php if (!empty($friend->profile_picture)): ?>
+                                    <img src="/uploads/pp/<?= h($friend->profile_picture) ?>" alt="Avatar">
+                                <?php else: ?>
+                                    <div class="avatar-placeholder-small"><?= strtoupper(substr($friend->first_name, 0, 1)) ?></div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
+
                         <div class="message-content">
                             <p><?= nl2br(h($msg->content)) ?></p>
                             <span class="message-time"><?= $msg->created->format('H:i') ?></span>
@@ -43,18 +54,14 @@ $this->assign('mainClass', 'main-index');
             </div>
 
             <?= $this->Form->create(null, ['url' => ['action' => 'sendMessage'], 'class' => 'message-form']) ?>
-
             <?= $this->Form->hidden('friend_id', ['value' => $friendId]) ?>
-
             <?= $this->Form->control('body', [
             'type' => 'textarea',
             'label' => false,
             'placeholder' => 'Écrivez votre message...',
             'required' => true
         ]) ?>
-
             <button type="submit" title="Envoyer"><i class="material-icons">send</i></button>
-
             <?= $this->Form->end() ?>
         <?php endif; ?>
     </div>
