@@ -2,16 +2,10 @@
         Index
 ============================== */
 
-.hero-actions {
+.hero-index {
     text-align: center;
     padding: 40px 20px;
-    background-color: var(--beige_fonce);
-}
-
-.hero-content h1 {
-    color: var(--bleu_fonce);
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+    background-color: var(--beige);
 }
 
 .hero-content p {
@@ -57,12 +51,12 @@
 .featured-section {
     padding: 20px 40px 40px 40px;
     margin: 0 auto;
-    background-color: var(--beige_fonce);
+    background-color: var(--beige);
 }
 
 .featured-section h2 {
     text-align: center;
-    color: var(--beige);
+    color: var(--bleu_clair);
     margin-bottom: 30px;
     position: relative;
     display: inline-block;

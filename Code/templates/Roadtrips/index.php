@@ -4,7 +4,7 @@
  * @var iterable<\App\Model\Entity\Roadtrip> $randomRoadtrips
  */
 ?>
-<section class="hero-actions">
+<section class="hero-index">
     <div class="hero-content">
         <h1>Prêt pour l'aventure ?</h1>
         <p>Créez votre propre itinéraire ou découvrez ceux de la communauté.</p>
