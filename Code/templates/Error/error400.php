@@ -20,10 +20,6 @@ endif;
 ?>
 
 <div class="error-container">
-    <div class="error-icon">
-        <i class="material-icons" style="font-size: 70px; color: var(--rouge);">location_off</i>
-    </div>
-
     <h2>Oups ! Page introuvable</h2>
 
     <p class="error">
@@ -32,6 +28,6 @@ endif;
     </p>
 
     <a href="<?= $this->Url->build('/') ?>" class="btn-back-home">
-        <i class="material-icons">home</i> Retour à l'accueil
+        &larr; Retour à l'accueil
     </a>
 </div>

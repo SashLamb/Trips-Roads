@@ -53,6 +53,8 @@ $isAdmin = $currentUser && isset($currentUser->role) && $currentUser->role === '
                     <li><?= $this->Html->link('Mes Road-Trips', ['controller' => 'Roadtrips', 'action' => 'myRoadtrips']) ?></li>
                 <?php endif; ?>
                 <li><?= $this->Html->link('Road-Trips Publics', ['controller' => 'Roadtrips', 'action' => 'publicRoadtrips'], ['class' => 'active']) ?></li>
+                <li><?= $this->Html->link('Accessibilité', ['controller' => 'Users', 'action' => 'accessibility'])?></li>
+
                 <?php if (isset($userId)): ?>
                     <li><?= $this->Html->link('Paramètres du compte', ['controller' => 'Users', 'action' => 'profile']) ?></li>
                     <li><?= $this->Html->link('Déconnexion', ['controller' => 'Users', 'action' => 'logout'], ['class' => 'logout']) ?></li>
