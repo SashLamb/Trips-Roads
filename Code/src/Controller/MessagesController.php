@@ -81,7 +81,6 @@ class MessagesController extends AppController
 
         $friend = $this->Messages->Recipients->get($friendId);
 
-        // Utilisation de l'association ORM (Senders pointe vers Users) au lieu de fetchTable()
         $user = $this->Messages->Senders->get($userId);
 
         $messages = $this->Messages->find()
