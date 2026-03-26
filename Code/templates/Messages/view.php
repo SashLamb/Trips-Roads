@@ -31,9 +31,9 @@ $this->assign('mainClass', 'main-index');
 
             <div class="messages-container" id="messagesContainer">
                 <?php foreach ($messages as $msg): ?>
-                    <div class="message <?= ($msg->sender_id == $userId) ? 'sent' : 'received' ?>">
+                    <div class="chat-bulle <?= ($msg->sender_id == $userId) ? 'sent' : 'received' ?>">
 
-                        <div class="message-avatar">
+                        <div class="chat-avatar">
                             <?php if ($msg->sender_id == $userId): ?>
                                 <div class="avatar-placeholder-small" style="background: var(--bleu_fonce);">M</div>
                             <?php else: ?>
@@ -45,9 +45,9 @@ $this->assign('mainClass', 'main-index');
                             <?php endif; ?>
                         </div>
 
-                        <div class="message-content">
+                        <div class="chat-content">
                             <p><?= nl2br(h($msg->content)) ?></p>
-                            <span class="message-time"><?= $msg->created->format('H:i') ?></span>
+                            <span class="chat-time"><?= $msg->created->format('H:i') ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>

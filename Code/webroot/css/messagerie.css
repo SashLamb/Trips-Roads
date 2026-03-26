@@ -14,7 +14,7 @@ button, input, select, textarea, label, p {
     background: white;
     border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* --- LISTE DES CONVERSATIONS --- */
@@ -113,10 +113,26 @@ button, input, select, textarea, label, p {
 }
 
 /* --- INFOS CONVERSATION --- */
-.conv-info { flex: 1; min-width: 0; }
-.conv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-.conv-name { font-weight: bold; font-size: 15px; }
-.conversation-item.active .conv-name { color: white; }
+.conv-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.conv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.conv-name {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.conversation-item.active .conv-name {
+    color: white;
+}
 
 .badge-non-lu {
     background: var(--orange);
@@ -126,7 +142,11 @@ button, input, select, textarea, label, p {
     font-size: 12px;
     font-weight: bold;
 }
-.conversation-item.active .badge-non-lu { background: white; color: var(--orange); }
+
+.conversation-item.active .badge-non-lu {
+    background: white;
+    color: var(--orange);
+}
 
 .conv-preview {
     font-size: 13px;
@@ -136,7 +156,10 @@ button, input, select, textarea, label, p {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.conversation-item.active .conv-preview { color: rgba(255,255,255,0.9); }
+
+.conversation-item.active .conv-preview {
+    color: rgba(255, 255, 255, 0.9);
+}
 
 /* --- ZONE DE CHAT --- */
 .chat-area {
@@ -152,9 +175,24 @@ button, input, select, textarea, label, p {
     background: var(--beige_fonce);
 }
 
-.chat-user-info { display: flex; align-items: center; gap: 15px; }
-.chat-user-info img, .chat-user-info .avatar-placeholder { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-.chat-user-info span { font-weight: bold; font-size: 18px; color: var(--bleu_fonce); }
+.chat-user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chat-user-info img, .chat-user-info .avatar-placeholder {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chat-user-info span {
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--bleu_fonce);
+}
 
 .messages-container {
     flex: 1;
@@ -167,66 +205,97 @@ button, input, select, textarea, label, p {
 }
 
 /* --- BULLES DE MESSAGES (STYLE INSTAGRAM) --- */
-.message {
+.chat-bulle {
     display: flex;
-    align-items: flex-end; /* Aligne l'avatar en bas de la bulle */
+    align-items: flex-end;
     gap: 10px;
     max-width: 75%;
-    width: fit-content; /* La bulle s'adapte à la taille du texte */
+    width: fit-content;
     margin-bottom: 5px;
+    text-align: left;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.message.received {
+.chat-bulle.received {
     align-self: flex-start;
     flex-direction: row;
     margin-right: auto;
 }
 
-.message.sent {
+.chat-bulle.sent {
     align-self: flex-end;
     flex-direction: row-reverse;
     margin-left: auto;
 }
 
-.message-content {
+.chat-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.chat-avatar img, .chat-avatar .avatar-placeholder-small {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chat-content {
     padding: 12px 16px;
     border-radius: 22px;
     font-size: 15px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     position: relative;
     text-align: left;
 }
 
-/* Design bulle Ami */
-.message.received .message-content {
-    background: #f1f0f0; /* Gris clair typique des messages reçus */
+.chat-bulle.received .chat-content {
+    background: #f1f0f0;
     color: #262626;
-    border-bottom-left-radius: 4px; /* Casse l'arrondi côté avatar comme sur Insta */
+    border-bottom-left-radius: 4px;
 }
 
-/* Design bulle Toi */
-.message.sent .message-content {
-    background: var(--bleu_clair, #3797f0); /* Ton bleu ou bleu Insta */
+.chat-bulle.sent .chat-content {
+    background: var(--bleu_clair, #3797f0);
     color: white;
-    border-bottom-right-radius: 4px; /* Casse l'arrondi côté avatar */
+    border-bottom-right-radius: 4px;
 }
 
-.message-content p { margin: 0; word-wrap: break-word; line-height: 1.4; }
+.chat-content p {
+    margin: 0;
+    word-wrap: break-word;
+    line-height: 1.4;
+    text-align: left;
+}
 
-.message-time {
+.chat-time {
     font-size: 11px;
     margin-top: 5px;
     display: block;
     opacity: 0.7;
 }
 
-.message.sent .message-time { color: rgba(255,255,255,0.9); text-align: right; }
-.message.received .message-time { color: #888; text-align: left; }
+.chat-bulle.sent .chat-time {
+    color: rgba(255, 255, 255, 0.9);
+    text-align: right;
+}
+
+.chat-bulle.received .chat-time {
+    color: #888;
+    text-align: left;
+}
 
 /* --- FORMULAIRE D'ENVOI --- */
 .message-form {
@@ -251,7 +320,11 @@ button, input, select, textarea, label, p {
     background: #fafafa;
 }
 
-.message-form textarea:focus { outline: none; border-color: var(--bleu_clair); background: white; }
+.message-form textarea:focus {
+    outline: none;
+    border-color: var(--bleu_clair);
+    background: white;
+}
 
 .message-form button {
     width: 45px;
@@ -268,15 +341,34 @@ button, input, select, textarea, label, p {
     flex-shrink: 0;
 }
 
-.message-form button i { font-size: 28px; }
-.message-form button:hover { transform: scale(1.1); color: var(--vert_btn); }
+.message-form button i {
+    font-size: 28px;
+}
+
+.message-form button:hover {
+    transform: scale(1.1);
+    color: var(--vert_btn);
+}
 
 .no-chat-selected {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    height: 100%; color: #999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
 }
-.no-chat-selected p { margin-top: 20px; font-size: 18px; }
-#chat_icon { font-size: 80px; color: var(--orange); opacity: 0.5; }
+
+.no-chat-selected p {
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+#chat_icon {
+    font-size: 80px;
+    color: var(--orange);
+    opacity: 0.5;
+}
 
 
 /*================================================================
@@ -300,6 +392,7 @@ button, input, select, textarea, label, p {
         width: 100%;
         border-right: none;
     }
+
     .conversations-list {
         width: 350px !important;
         display: flex !important;
