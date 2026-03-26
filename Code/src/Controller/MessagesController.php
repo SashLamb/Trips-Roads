@@ -81,6 +81,9 @@ class MessagesController extends AppController
 
         $friend = $this->Messages->Recipients->get($friendId);
 
+        // Utilisation de l'association ORM (Senders pointe vers Users) au lieu de fetchTable()
+        $user = $this->Messages->Senders->get($userId);
+
         $messages = $this->Messages->find()
             ->where([
                 'OR' => [
@@ -98,7 +101,7 @@ class MessagesController extends AppController
 
         $conversationId = $friendId;
 
-        $this->set(compact('messages', 'friend', 'userId', 'friendId', 'conversationId'));
+        $this->set(compact('messages', 'friend', 'user', 'userId', 'friendId', 'conversationId'));
     }
 
     /**
@@ -118,7 +121,6 @@ class MessagesController extends AppController
         if (!empty($body) && $friendId) {
             $conversationsTable = $this->getTableLocator()->get('Conversations');
 
-            // Find existing conversation or create a new one
             $conversation = $conversationsTable->find()
                 ->where(['OR' => [
                     ['user_one_id' => $userId, 'user_two_id' => $friendId],

@@ -116,49 +116,57 @@ button, input, select, textarea, label, p {
 .conv-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .conv-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .conv-name {
-    font-weight: bold;
-    font-size: 15px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--bleu_fonce_ecriture);
 }
 
 .conversation-item.active .conv-name {
     color: white;
 }
 
-.badge-non-lu {
-    background: var(--orange);
-    color: white;
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.conversation-item.active .badge-non-lu {
-    background: white;
-    color: var(--orange);
-}
-
 .conv-preview {
-    font-size: 13px;
-    color: #666;
+    font-size: 13.5px;
+    color: #888;
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 400;
 }
 
-.conversation-item.active .conv-preview {
-    color: rgba(255, 255, 255, 0.9);
+.conv-preview strong {
+    font-weight: 600;
+    color: #666;
+}
+
+.conversation-item.active .conv-preview,
+.conversation-item.active .conv-preview strong {
+    color: rgba(255,255,255,0.85);
+}
+
+.badge-non-lu {
+    background: var(--rouge);
+    color: white;
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* --- ZONE DE CHAT --- */
@@ -297,59 +305,75 @@ button, input, select, textarea, label, p {
     text-align: left;
 }
 
-/* --- FORMULAIRE D'ENVOI --- */
+/* --- ZONE DE SAISIE DU MESSAGE --- */
 .message-form {
     display: flex;
-    padding: 15px 20px;
-    border-top: 1px solid #e0e0e0;
-    background: white;
-    gap: 10px;
     align-items: flex-end;
+    gap: 15px;
+    padding: 15px 20px;
+    background: white;
+    border-top: 1px solid #f0f0f0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
+
+.message-form .input,
+.message-form .textarea {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+
 .message-form textarea {
-    flex: 1;
-    padding: 12px 20px;
-    border: 1px solid #dbdbdb;
-    border-radius: 25px;
-    resize: none;
-    font-family: inherit;
-    font-size: 15px;
+    width: 100% !important;
+    flex: 1 1 auto;
     min-height: 45px;
     max-height: 120px;
-    background: #fafafa;
+    padding: 12px 18px;
+    border: 1px solid #ddd;
+    border-radius: 24px;
+    font-family: inherit;
+    font-size: 15px;
+    resize: none;
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: border-color 0.2s;
+    box-sizing: border-box;
 }
 
 .message-form textarea:focus {
-    outline: none;
     border-color: var(--bleu_clair);
-    background: white;
 }
 
+
 .message-form button {
-    width: 45px;
-    height: 45px;
-    border: none;
-    background: transparent;
-    color: var(--bleu_clair); /* Couleur du bouton Insta */
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
+    flex: 0 0 45px !important;
+    width: 45px !important;
+    max-width: 45px !important;
+    height: 45px !important;
+    border-radius: 50% !important;
+    background-color: var(--bleu_clair) !important;
+    color: white !important;
+    border: none !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 0 !important;
 }
 
 .message-form button i {
-    font-size: 28px;
+    font-size: 20px;
+    margin-left: 3px;
 }
 
 .message-form button:hover {
-    transform: scale(1.1);
-    color: var(--vert_btn);
+    background-color: var(--vert_btn) !important;
+    transform: scale(1.05);
 }
-
 .no-chat-selected {
     display: flex;
     flex-direction: column;
