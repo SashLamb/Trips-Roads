@@ -112,8 +112,10 @@ class UsersController extends AppController
             ]);
 
             $googleUser = $provider->getResourceOwner($token);
-            $email = $googleUser->getEmail();
 
+            $email = $googleUser->getEmail();
+            $name = $googleUser->getName();
+            $socialId = $googleUser->getId();
             $firstName = $googleUser->getFirstName() ?: 'Utilisateur';
             $lastName = $googleUser->getLastName() ?: 'Google';
 
@@ -122,20 +124,22 @@ class UsersController extends AppController
             if (!$user) {
                 $user = $this->Users->newEmptyEntity();
                 $user->email = $email;
-
                 $user->username = $name . '_' . substr(uniqid(), -4);
-
                 $user->first_name = $firstName;
                 $user->last_name = $lastName;
-
                 $user->password = 'Google_' . uniqid() . 'A1!';
-
                 $user->social_id = $socialId;
                 $user->social_provider = 'google';
 
                 if (!$this->Users->save($user)) {
                     $this->Flash->error(__('Erreur lors de la création du compte Google.'));
                     return $this->redirect(['action' => 'login']);
+                }
+            } else {
+                if (empty($user->social_id)) {
+                    $user->social_id = $socialId;
+                    $user->social_provider = 'google';
+                    $this->Users->save($user);
                 }
             }
 
