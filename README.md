@@ -1,4 +1,4 @@
-## 🧹 Qualité du Code & Bonnes Pratiques
+## Qualité du Code & Bonnes Pratiques
 
 ### 3 - Les bonnes habitudes
 
@@ -44,7 +44,7 @@
 
 ---
 
-## 🤖 Utilisation de l'Intelligence Artificielle
+## Utilisation de l'Intelligence Artificielle
 
 Dans le cadre de l'amélioration de la qualité du code et du refactoring de l'application, l'Intelligence Artificielle a été utilisée comme assistant de développement.
 
