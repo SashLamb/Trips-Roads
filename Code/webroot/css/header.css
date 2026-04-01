@@ -36,6 +36,8 @@ header nav > ul > li > a > img {
   color: var(--beige);
   list-style: none;
   font-size: 3rem;
+    position: relative;
+    left: 65px;
 }
 
 header nav > ul > div > li > a {
@@ -376,33 +378,33 @@ header>nav>label>span::before{
   position: absolute;
   transition: 1s;
   z-index: 2;
-  top : 55px;
-  left : 20px;
+  top : 88px;
+  left : 50px;
 }
 
 header>nav>label>span::after {
-  margin-top: -66px;
-  margin-left: -20px;
+  margin-top: -77px;
+  margin-left: -50px;
 
 }
 header>nav>label>span::before {
-  margin-top: -43px;
-  margin-left: -20px;
+  margin-top: -99px;
+  margin-left: -50px;
 }
 
 header>nav>input:checked ~ label>span::before{
-  transform: rotate(45deg) translateX(40px) translateY(-59px);
+  transform: rotate(45deg) translateX(70px) translateY(-55px);
   transition: 1s;
 }
 
 header>nav>input:checked ~ label>span{
-  transform: translateX(-70px);
+  transform: translateX(-100px);
   transition: 1s;
 
 }
 
 header>nav>input:checked ~ label>span::after{
-  transform: rotate(-45deg) translateX(43px) translateY(56px);;
+  transform: rotate(-45deg) translateX(70px) translateY(55px);;
   transition: 1s;
 }
 

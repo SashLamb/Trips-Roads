@@ -72,11 +72,13 @@ $currentUser = $this->request->getAttribute('identity');
 <header>
     <nav>
         <ul>
-            <li class="title" id="link_Titre">
-                <?= $this->Html->link('Trips & Roads', '/') ?>
-            </li>
+
 
             <?php if ($currentUser): ?>
+                <li class="title" id="link_Titre">
+                    <?= $this->Html->link('Trips & Roads', '/') ?>
+                </li>
+
                 <li class="nav-item" id="link_access">
                     <?= $this->Html->link(
                         '<i class="material-icons">settings_accessibility</i><span>Paramètres</span>',
@@ -141,20 +143,22 @@ $currentUser = $this->request->getAttribute('identity');
                     ) ?>
                 </li>
             <?php else: ?>
-                <li class="nav-item" id="link_access">
-                    <?= $this->Html->link(
-                        '<i class="material-icons">settings_accessibility</i><span>Accessibilité</span>',
-                        ['controller' => 'Users', 'action' => 'accessibility'],
-                        ['escape' => false]
-                    ) ?>
+                <li style="flex: 1;"></li>
+
+                <li class="title" id="link_Titre" style="flex: 2; text-align: center;">
+                    <?= $this->Html->link('Trips & Roads', '/') ?>
                 </li>
-                <li class="nav-item">
+
+                <li class="nav-item" style="flex: 1; display: flex; justify-content: flex-start;">
                     <?= $this->Html->link(
                         '<i class="material-icons">account_circle</i><span>Se connecter</span>',
                         ['controller' => 'Users', 'action' => 'login'],
-                        ['escape' => false]
+                        ['escape' => false, 'style' => 'display: flex; align-items: center; text-decoration: none;']
                     ) ?>
                 </li>
+
+
+
             <?php endif; ?>
         </ul>
 
