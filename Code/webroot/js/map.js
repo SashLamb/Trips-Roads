@@ -413,7 +413,7 @@ function removeSegmentFromMap(index) {
     }
 }
 
-async function _ajouterSegmentEntre(startName, startCoords, endName, endCoords, index, strategy, existingData = null) {
+async function _addSegmentBetween(startName, startCoords, endName, endCoords, index, strategy, existingData = null) {
     const modeTransport  = existingData ? existingData.mode : 'Voiture';
     const currentProfile = TRANSPORT_STRATEGIES[modeTransport] || 'driving';
 
@@ -822,7 +822,7 @@ async function validateNewSegment() {
         return;
     }
 
-    await _ajouterSegmentEntre(startName, startCoords, endName, endCoords, state.segments.length, TRANSPORT_STRATEGIES['Voiture']);
+    await _addSegmentBetween(startName, startCoords, endName, endCoords, state.segments.length, TRANSPORT_STRATEGIES['Voiture']);
     addMarker(endName, endCoords, "ville", endName);
 
     state.currentStartCity   = endName;
@@ -1067,7 +1067,7 @@ async function loadExistingRoadTrip() {
             addMarker(t.depart,  startCoords, "ville", t.depart);
             addMarker(t.arrivee, endCoords,   "ville", t.arrivee);
 
-            await _ajouterSegmentEntre(
+            await _addSegmentBetween(
                 t.depart, startCoords,
                 t.arrivee, endCoords,
                 state.segments.length,
