@@ -96,19 +96,19 @@ $this->assign('mainClass', '');
         </div>
 
         <div class="legend-date-container">
-            <label>Départ le :</label>
-            <input type="date" class="legend-date-input" required>
-            <label>à :</label>
-            <input type="time" class="legend-time-input" value="08:00" required>
+            <label aria-hidden="true">Départ le :</label>
+            <input type="date" name="date_trajet" class="legend-date-input" required aria-label="Date de départ">
+            <label aria-hidden="true">à :</label>
+            <input type="time" name="heure_depart" class="legend-time-input" value="08:00" required aria-label="Heure de départ">
         </div>
 
         <div class="route-preferences hidden">
             <label class="pref-item">
-                <input type="checkbox" class="pref-checkbox" data-pref="exclude-tolls">
+                <input type="checkbox" name="exclude_tolls" class="pref-checkbox" data-pref="exclude-tolls">
                 <span>Sans péages</span>
             </label>
             <label class="pref-item">
-                <input type="checkbox" class="pref-checkbox" data-pref="exclude-motorways">
+                <input type="checkbox" name="exclude_motorways" class="pref-checkbox" data-pref="exclude-motorways">
                 <span>Sans autoroutes</span>
             </label>
         </div>
@@ -120,12 +120,12 @@ $this->assign('mainClass', '');
 
 <template id="template-sub-etape">
     <div class="subEtape sub-etape-form">
-        <input type="text" placeholder="Nom du lieu ou ville" class="subEtapeNom">
+        <input type="text" name="sous_etape_nom" placeholder="Nom du lieu ou ville" class="subEtapeNom" aria-label="Nom du lieu ou ville">
 
         <div class="subEtapeEditorContainer"></div>
 
-        <label class="small-bold-label">Temps passé sur place (estimation)</label>
-        <input type="time" class="subEtapeHeure" required>
+        <label class="small-bold-label" aria-hidden="true">Temps passé sur place (estimation)</label>
+        <input type="time" name="sous_etape_heure" class="subEtapeHeure" required aria-label="Temps passé sur place (estimation)">
 
         <button type="button" class="removeSubEtapeBtn sub-etape-remove-btn">✖</button>
     </div>

@@ -22,7 +22,9 @@
       "Bash(vendor/bin/phpunit tests/TestCase/ApplicationTest.php tests/TestCase/Controller/FriendshipsControllerTest.php --no-coverage)",
       "Bash(composer check *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(sed *)",
+      "Bash(del tmp\\\\tests.sqlite)"
     ]
   }
 }

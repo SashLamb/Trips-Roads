@@ -6,6 +6,7 @@ namespace App\Controller;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventInterface;
 use Cake\Http\Client;
+use Cake\Http\Response;
 use Cake\I18n\FrozenTime;
 use Cake\Log\Log;
 use Cake\ORM\Table;
@@ -45,7 +46,7 @@ class RoadtripsController extends AppController
     public function beforeFilter(EventInterface $event)
     {
         parent::beforeFilter($event);
-        $this->Authentication->addUnauthenticatedActions(['index', 'publicRoadtrips', 'view']);
+        $this->Authentication->addUnauthenticatedActions(['index', 'publicRoadtrips', 'view', 'routeProxy']);
     }
 
     /**
@@ -501,16 +502,67 @@ class RoadtripsController extends AppController
         }
 
         $geocodedPlacesTable = $this->fetchTable('GeocodedPlaces');
-        $jsMapData = [];
 
+        // Collect all city names that are not already stored in the trips/sub_steps rows
+        $cityNamesNeeded = [];
         foreach ($roadtrip->trips as $trip) {
-            $departureCoords = $this->_getCoordinates($trip->departure, $geocodedPlacesTable);
-            $arrivalCoords = $this->_getCoordinates($trip->arrival, $geocodedPlacesTable);
+            if (empty($trip->departure_latitude) && !empty($trip->departure)) {
+                $cityNamesNeeded[] = trim($trip->departure);
+            }
+            if (empty($trip->arrival_latitude) && !empty($trip->arrival)) {
+                $cityNamesNeeded[] = trim($trip->arrival);
+            }
+            foreach ($trip->sub_steps as $se) {
+                if (empty($se->latitude) && !empty($se->city)) {
+                    $cityNamesNeeded[] = trim($se->city);
+                }
+            }
+        }
+
+        // Single batch DB lookup for all uncached cities
+        $coordsCache = [];
+        if (!empty($cityNamesNeeded)) {
+            $cityNamesNeeded = array_unique($cityNamesNeeded);
+            $places = $geocodedPlacesTable->find()
+                ->where(['name IN' => $cityNamesNeeded])
+                ->all();
+            foreach ($places as $place) {
+                $coordsCache[$place->name] = ['lat' => $place->latitude, 'lon' => $place->longitude];
+            }
+
+            // Call Nominatim only for cities still missing from cache
+            foreach ($cityNamesNeeded as $cityName) {
+                if (!isset($coordsCache[$cityName])) {
+                    $coords = $this->_getCoordinates($cityName, $geocodedPlacesTable);
+                    if ($coords) {
+                        $coordsCache[$cityName] = $coords;
+                    }
+                }
+            }
+        }
+
+        $jsMapData = [];
+        foreach ($roadtrip->trips as $trip) {
+            if (!empty($trip->departure_latitude)) {
+                $departureCoords = ['lat' => $trip->departure_latitude, 'lon' => $trip->departure_longitude];
+            } else {
+                $departureCoords = $coordsCache[trim($trip->departure)] ?? null;
+            }
+
+            if (!empty($trip->arrival_latitude)) {
+                $arrivalCoords = ['lat' => $trip->arrival_latitude, 'lon' => $trip->arrival_longitude];
+            } else {
+                $arrivalCoords = $coordsCache[trim($trip->arrival)] ?? null;
+            }
 
             $subStepCoords = [];
             foreach ($trip->sub_steps as $se) {
                 if (!empty($se->city)) {
-                    $coords = $this->_getCoordinates($se->city, $geocodedPlacesTable);
+                    if (!empty($se->latitude)) {
+                        $coords = ['lat' => $se->latitude, 'lon' => $se->longitude];
+                    } else {
+                        $coords = $coordsCache[trim($se->city)] ?? null;
+                    }
                     if ($coords) {
                         $subStepCoords[] = [
                             'lat' => $coords['lat'],
@@ -606,6 +658,62 @@ class RoadtripsController extends AppController
     }
 
     /**
+     * Server-side proxy for OSRM routing API requests.
+     * Bypasses browser proxy restrictions by making the routing call server-to-server.
+     *
+     * @return \Cake\Http\Response
+     */
+    public function routeProxy(): Response
+    {
+        $this->request->allowMethod(['get']);
+
+        $coords = (string)($this->request->getQuery('coords') ?? '');
+        $mode = (string)($this->request->getQuery('mode') ?? 'Voiture');
+        $params = (string)($this->request->getQuery('params') ?? 'overview=full&geometries=geojson');
+
+        if (!preg_match('/^[\d.;\-,]+$/', $coords) || empty($coords)) {
+            return $this->response->withStatus(400)
+                ->withType('application/json')
+                ->withStringBody('{"code":"InvalidRequest"}');
+        }
+
+        $servers = [
+            'voiture' => 'https://routing.openstreetmap.de/routed-car',
+            'velo' => 'https://routing.openstreetmap.de/routed-bike',
+            'marche' => 'https://routing.openstreetmap.de/routed-foot',
+        ];
+
+        $modeKey = strtolower($mode);
+        $baseUrl = $servers[$modeKey] ?? $servers['voiture'];
+
+        $urls = [
+            "{$baseUrl}/route/v1/driving/{$coords}?{$params}",
+            "https://router.project-osrm.org/route/v1/driving/{$coords}?{$params}",
+        ];
+
+        $http = new Client();
+        foreach ($urls as $url) {
+            try {
+                $response = $http->get($url, [], [
+                    'headers' => ['User-Agent' => 'SaeRoadTripApp/1.0'],
+                    'timeout' => 8,
+                ]);
+                if ($response->isOk()) {
+                    return $this->response
+                        ->withType('application/json')
+                        ->withStringBody($response->getStringBody());
+                }
+            } catch (Exception $e) {
+                Log::warning('routeProxy failed for ' . $url . ': ' . $e->getMessage());
+            }
+        }
+
+        return $this->response->withStatus(502)
+            ->withType('application/json')
+            ->withStringBody('{"code":"Error","message":"All routing servers unavailable"}');
+    }
+
+    /**
      * Retrieves coordinates for a given city name via DB cache or Nominatim API.
      *
      * @param string $cityName The name of the city.
@@ -652,7 +760,7 @@ class RoadtripsController extends AppController
                     $newPlace->name = $cleanName;
                     $newPlace->latitude = $lat;
                     $newPlace->longitude = $lon;
-                    $newPlace->last_used = FrozenTime::now();
+                    $newPlace->modified = FrozenTime::now();
 
                     $table->save($newPlace);
 
@@ -688,7 +796,11 @@ class RoadtripsController extends AppController
                 'order_number' => $index + 1,
                 'title' => ($tripJs['depart'] ?? '') . ' -> ' . ($tripJs['arrivee'] ?? ''),
                 'departure' => $tripJs['depart'] ?? '',
+                'departure_latitude' => isset($tripJs['departLat']) ? (float)$tripJs['departLat'] : null,
+                'departure_longitude' => isset($tripJs['departLon']) ? (float)$tripJs['departLon'] : null,
                 'arrival' => $tripJs['arrivee'] ?? '',
+                'arrival_latitude' => isset($tripJs['arriveeLat']) ? (float)$tripJs['arriveeLat'] : null,
+                'arrival_longitude' => isset($tripJs['arriveeLon']) ? (float)$tripJs['arriveeLon'] : null,
                 'transport_mode' => $tripJs['mode'] ?? 'Voiture',
                 'departure_time' => $tripJs['heure_depart'] ?? '08:00',
                 'date' => !empty($tripJs['date_trajet']) ? $tripJs['date_trajet'] : null,
@@ -703,6 +815,8 @@ class RoadtripsController extends AppController
                         'description' => $se['remarque'] ?? '',
                         'transport_type' => $tripJs['mode'] ?? 'Voiture',
                         'duration' => $se['heure'] ?? null,
+                        'latitude' => isset($se['lat']) ? (float)$se['lat'] : null,
+                        'longitude' => isset($se['lon']) ? (float)$se['lon'] : null,
                     ];
                 }
             }

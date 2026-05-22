@@ -14,13 +14,37 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
     initGlobalMap();
-    setTimeout(calculateAllSegments, 1000);
+    setTimeout(calculateAllSegments, 300);
 });
 
 /** * Stores instances of individual step maps indexed by ID
  * @type {Object.<string, L.Map>}
  */
 const viewMapInstances = {};
+
+/**
+ * Fetches a route via the server-side proxy (bypasses browser proxy restrictions).
+ * @param {string} coords - Semicolon-separated "lon,lat" pairs
+ * @param {string} mode - Lowercase transport mode string
+ * @param {string} queryParams - URL query string
+ * @returns {Promise<Object|null>}
+ */
+async function fetchViewRoute(coords, mode, queryParams) {
+    const proxyUrl = `/roadtrips/route-proxy?coords=${encodeURIComponent(coords)}&mode=${encodeURIComponent(mode)}&params=${encodeURIComponent(queryParams)}`;
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
+        const resp = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timer);
+        if (resp.ok) {
+            const json = await resp.json();
+            if (json.code === 'Ok') return json;
+        }
+    } catch (e) {
+        console.warn(`Route proxy failed: ${e.message}`);
+    }
+    return null;
+}
 
 /** * Color palette for distinct trip paths
  * @type {string[]}
@@ -164,16 +188,7 @@ async function drawRoute(map, data, color, fitBounds, clusterGroup) {
 
     createNumberedMarker(map, data.arrivee, stepCounter, color, `<b>Arrivée:</b> ${data.arrivee.nom}`, 'right', clusterGroup);
 
-    const servers = {
-        'voiture': 'https://routing.openstreetmap.de/routed-car',
-        'velo': 'https://routing.openstreetmap.de/routed-bike',
-        'vélo': 'https://routing.openstreetmap.de/routed-bike',
-        'marche': 'https://routing.openstreetmap.de/routed-foot',
-        'à pied': 'https://routing.openstreetmap.de/routed-foot'
-    };
-
     const mode = (data.mode || 'voiture').toLowerCase();
-    const baseUrl = servers[mode] || servers['voiture'];
 
     let coords = `${data.depart.lon},${data.depart.lat}`;
     if(data.sousEtapes) {
@@ -183,27 +198,22 @@ async function drawRoute(map, data, color, fitBounds, clusterGroup) {
     }
     coords += `;${data.arrivee.lon},${data.arrivee.lat}`;
 
-    const url = `${baseUrl}/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+    const json = await fetchViewRoute(coords, mode, 'overview=full&geometries=geojson');
 
-    try {
-        const resp = await fetch(url);
-        const json = await resp.json();
+    if (json && json.routes[0]) {
+        const style = {
+            color: color,
+            weight: 5,
+            opacity: 0.8,
+            dashArray: (mode !== 'voiture') ? '10, 10' : null
+        };
 
-        if (json.code === 'Ok' && json.routes[0]) {
-            const style = {
-                color: color,
-                weight: 5,
-                opacity: 0.8,
-                dashArray: (mode !== 'voiture') ? '10, 10' : null
-            };
+        const layer = L.geoJSON(json.routes[0].geometry, style).addTo(map);
 
-            const layer = L.geoJSON(json.routes[0].geometry, style).addTo(map);
-
-            if(fitBounds) map.fitBounds(layer.getBounds(), { padding:[30,30] });
-            data.layerBounds = layer.getBounds();
-        }
-    } catch(e) {
-        console.warn("API Routage échouée, tracé ligne droite.", e);
+        if(fitBounds) map.fitBounds(layer.getBounds(), { padding:[30,30] });
+        data.layerBounds = layer.getBounds();
+    } else {
+        console.warn("Tous les serveurs de routage ont échoué, tracé ligne droite.");
         const points = [[data.depart.lat, data.depart.lon]];
         if(data.sousEtapes) data.sousEtapes.forEach(s => points.push([s.lat, s.lon]));
         points.push([data.arrivee.lat, data.arrivee.lon]);
@@ -291,14 +301,12 @@ function checkToggleGlobalMap() {
     }
 }
 /**
- * Iterates through all cards to calculate segment distances and times.
+ * Fetches OSRM routing data for all trip cards in parallel.
  * @function calculateAllSegments
  */
 function calculateAllSegments() {
     const cards = document.querySelectorAll('.card-vu');
-    cards.forEach((card, i) => {
-        setTimeout(() => processCardTimes(card), i * 600);
-    });
+    Promise.all([...cards].map(card => processCardTimes(card)));
 }
 /**
  * Processes OSRM routing data for a specific card to update UI with distances and times.
@@ -313,26 +321,16 @@ async function processCardTimes(card) {
 
     if(!data || !data.depart) return;
 
-    const servers = {
-        'voiture': 'https://routing.openstreetmap.de/routed-car',
-        'velo': 'https://routing.openstreetmap.de/routed-bike',
-        'vélo': 'https://routing.openstreetmap.de/routed-bike',
-        'marche': 'https://routing.openstreetmap.de/routed-foot',
-        'à pied': 'https://routing.openstreetmap.de/routed-foot'
-    };
-    const baseUrl = servers[data.mode] || servers['voiture'];
+    const mode = (data.mode || 'voiture').toLowerCase();
 
     let coords = `${data.depart.lon},${data.depart.lat}`;
     if(data.sousEtapes) data.sousEtapes.forEach(s => { coords += `;${s.lon},${s.lat}`; });
     coords += `;${data.arrivee.lon},${data.arrivee.lat}`;
 
-    const url = `${baseUrl}/route/v1/driving/${coords}?overview=false&steps=false`;
-
     try {
-        const resp = await fetch(url);
-        const json = await resp.json();
+        const json = await fetchViewRoute(coords, mode, 'overview=false&steps=false');
 
-        if (json.code === 'Ok' && json.routes && json.routes[0]) {
+        if (json && json.routes && json.routes[0]) {
             const legs = json.routes[0].legs;
 
             let currentClock = data.heure_depart || '08:00';

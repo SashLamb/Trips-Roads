@@ -559,7 +559,6 @@
 
 /* Animation d'ouverture du conteneur des sous-étapes */
 #segmentFormContainer {
-    display: none; /* Reste géré par JS */
     background: var(--beige_fonce);
     padding: 30px;
     border-radius: 16px;

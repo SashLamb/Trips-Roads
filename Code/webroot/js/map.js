@@ -34,6 +34,30 @@ const ROUTING_SERVERS = {
     'Marche':  'https://routing.openstreetmap.de/routed-foot'
 };
 
+/**
+ * Fetches a route via the server-side proxy (bypasses browser proxy restrictions).
+ * @param {string} coordString - Semicolon-separated "lon,lat" pairs
+ * @param {string} mode - Transport mode key ('Voiture', 'Velo', 'Marche')
+ * @param {string} queryParams - Additional query string parameters
+ * @returns {Promise<Object|null>} Parsed OSRM response or null on total failure
+ */
+async function fetchRoute(coordString, mode, queryParams = 'overview=full&geometries=geojson') {
+    const proxyUrl = `/roadtrips/route-proxy?coords=${encodeURIComponent(coordString)}&mode=${encodeURIComponent(mode)}&params=${encodeURIComponent(queryParams)}`;
+    try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
+        const resp = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timer);
+        if (resp.ok) {
+            const json = await resp.json();
+            if (json.code === 'Ok') return json;
+        }
+    } catch (e) {
+        console.warn(`Route proxy failed: ${e.message}`);
+    }
+    return null;
+}
+
 const SEGMENT_COLORS = [
     '#0B667D', '#2E8B57', '#FF7F50', '#BF092F', '#8e44ad', '#d35400', '#2980b9',
     '#16A085', '#E67E22', '#8E44AD', '#2C3E50', '#C0392B', '#27AE60', '#F1C40F',
@@ -324,7 +348,7 @@ async function loadMapFavorites() {
 
         container.querySelector('.btn-step').addEventListener('click', () => {
             const formContainer = document.getElementById('segmentFormContainer');
-            if (formContainer.style.display === 'block') {
+            if (!formContainer.classList.contains('hidden')) {
                 document.getElementById('addSubEtape').click();
                 setTimeout(() => {
                     const allInputs = document.querySelectorAll('.subEtapeNom');
@@ -424,16 +448,14 @@ async function _addSegmentBetween(startName, startCoords, endName, endCoords, in
     coordsList.push(endCoords);
 
     const coordString = coordsList.map(c => `${c[1]},${c[0]}`).join(';');
-    const url = `https://router.project-osrm.org/route/v1/${currentProfile}/${coordString}?overview=full&geometries=geojson`;
 
     try {
-        const resp = await fetch(url);
-        const data = await resp.json();
+        const data = await fetchRoute(coordString, modeTransport);
 
         const color = SEGMENT_COLORS[index % SEGMENT_COLORS.length];
         let line, routeDistance = 0, routeDuration = 0, routeLegs = null;
 
-        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+        if (data && data.routes && data.routes.length > 0) {
             const route = data.routes[0];
             routeDistance = route.distance;
             routeDuration = route.duration;
@@ -447,7 +469,7 @@ async function _addSegmentBetween(startName, startCoords, endName, endCoords, in
             };
             line = L.geoJSON(route.geometry, lineStyle).addTo(state.map);
         } else {
-            console.warn("⚠️ Impossible de tracer la route pour : " + startName + " -> " + endName, data);
+            console.warn("⚠️ Impossible de tracer la route pour : " + startName + " -> " + endName);
             line = L.polyline(coordsList, { color: 'red', weight: 4, dashArray: '5, 10' }).addTo(state.map);
         }
 
@@ -517,8 +539,6 @@ async function updateRouteSegment(index, mode, options = {}) {
     const seg = state.segments[index];
     if (!seg) return;
 
-    const baseUrl = ROUTING_SERVERS[mode] || ROUTING_SERVERS['Voiture'];
-
     let points = [seg.startCoord];
     if (seg.sousEtapes) {
         seg.sousEtapes.forEach(se => { if (se.coords) points.push(se.coords); });
@@ -526,13 +546,11 @@ async function updateRouteSegment(index, mode, options = {}) {
     points.push(seg.endCoord);
 
     const coordString = points.map(p => `${p[1]},${p[0]}`).join(';');
-    const url = `${baseUrl}/route/v1/driving/${coordString}?overview=full&geometries=geojson&continue_straight=true`;
 
     try {
-        const resp = await fetch(url);
-        const data = await resp.json();
+        const data = await fetchRoute(coordString, mode, 'overview=full&geometries=geojson&continue_straight=true');
 
-        if (data.code === 'Ok') {
+        if (data && data.routes && data.routes.length > 0) {
             const route = data.routes[0];
             if (seg.line) state.map.removeLayer(seg.line);
 
@@ -550,7 +568,8 @@ async function updateRouteSegment(index, mode, options = {}) {
             state.map.fitBounds(seg.line.getBounds(), { padding: [50, 50] });
 
             updateLegendHtml(index);
-            console.log(`Succès ! Mode: ${mode}, Route mise à jour.`);
+        } else {
+            console.error('Mise à jour de la route échouée — tous les serveurs sont indisponibles.');
         }
     } catch (e) {
         console.error("Erreur de mise à jour de la route :", e);
@@ -631,7 +650,7 @@ function openSegmentEditor(index) {
     state.currentSegmentIndex = index;
     const seg = state.segments[index];
 
-    document.getElementById('segmentFormContainer').style.display = 'block';
+    document.getElementById('segmentFormContainer').classList.remove('hidden');
     document.getElementById('segmentTitle').textContent = `${seg.startNameSimple} → ${seg.endNameSimple}`;
 
     const container = document.getElementById('subEtapesContainer');
@@ -746,12 +765,12 @@ function openNewSegmentForm() {
     let html = '';
 
     if (!state.currentStartCoords) {
-        html += `<div class="new-block-field"><label class="new-block-label">Départ :</label><input type="text" id="inputStartBlock" class="new-block-input"></div>`;
+        html += `<div class="new-block-field"><label class="new-block-label" for="inputStartBlock">Départ :</label><input type="text" id="inputStartBlock" name="depart" class="new-block-input"></div>`;
     } else {
         html += `<div class="new-block-static"><strong>Départ :</strong> ${state.currentStartCity}</div>`;
     }
 
-    html += `<div class="new-block-field"><label class="new-block-label">Arrivée :</label><input type="text" id="inputEndBlock" class="new-block-input"></div>
+    html += `<div class="new-block-field"><label class="new-block-label" for="inputEndBlock">Arrivée :</label><input type="text" id="inputEndBlock" name="arrivee" class="new-block-input"></div>
              <div class="new-block-actions">
                 <button id="btnCancelBlock" class="btn-block-action btn-block-cancel">Annuler</button>
                 <button id="btnValidateBlock" class="btn-block-action btn-block-validate">Valider</button>
@@ -1039,9 +1058,8 @@ async function handleGenerateAI() {
 // ============================================================
 
 async function loadExistingRoadTrip() {
-    for (let i = 0; i < EXISTING_TRAJETS.length; i++) {
-        const t = EXISTING_TRAJETS[i];
-
+    // Geocode all trips in parallel, then add segments in order
+    const resolved = await Promise.all(EXISTING_TRAJETS.map(async (t) => {
         const startCoords = (t.departLat && t.departLon)
             ? [parseFloat(t.departLat), parseFloat(t.departLon)]
             : await getCoordinate(t.depart);
@@ -1052,32 +1070,38 @@ async function loadExistingRoadTrip() {
 
         let sousEtapesWithCoords = [];
         if (t.sousEtapes && t.sousEtapes.length > 0) {
-            for (const se of t.sousEtapes) {
+            const subResults = await Promise.all(t.sousEtapes.map(async (se) => {
                 const c = (se.lat && se.lon)
                     ? [parseFloat(se.lat), parseFloat(se.lon)]
                     : await getCoordinate(se.nom);
-                if (c) {
-                    sousEtapesWithCoords.push({ ...se, coords: c });
-                    addMarker(se.nom, c, "sous_etape", `<b>${se.nom}</b><br>${se.heure}`);
-                }
-            }
+                return c ? { ...se, coords: c } : null;
+            }));
+            sousEtapesWithCoords = subResults.filter(Boolean);
         }
 
-        if (startCoords && endCoords) {
-            addMarker(t.depart,  startCoords, "ville", t.depart);
-            addMarker(t.arrivee, endCoords,   "ville", t.arrivee);
+        return { t, startCoords, endCoords, sousEtapesWithCoords };
+    }));
 
-            await _addSegmentBetween(
-                t.depart, startCoords,
-                t.arrivee, endCoords,
-                state.segments.length,
-                TRANSPORT_STRATEGIES[t.mode],
-                { mode: t.mode, date_trajet: t.date_trajet || t.date, heure_depart: t.heure_depart, sousEtapes: sousEtapesWithCoords }
-            );
+    // Add segments sequentially to preserve order and state
+    for (const { t, startCoords, endCoords, sousEtapesWithCoords } of resolved) {
+        if (!startCoords || !endCoords) continue;
 
-            state.currentStartCity   = t.arrivee;
-            state.currentStartCoords = endCoords;
+        for (const se of sousEtapesWithCoords) {
+            addMarker(se.nom, se.coords, "sous_etape", `<b>${se.nom}</b><br>${se.heure}`);
         }
+        addMarker(t.depart, startCoords, "ville", t.depart);
+        addMarker(t.arrivee, endCoords, "ville", t.arrivee);
+
+        await _addSegmentBetween(
+            t.depart, startCoords,
+            t.arrivee, endCoords,
+            state.segments.length,
+            TRANSPORT_STRATEGIES[t.mode],
+            { mode: t.mode, date_trajet: t.date_trajet || t.date, heure_depart: t.heure_depart, sousEtapes: sousEtapesWithCoords }
+        );
+
+        state.currentStartCity   = t.arrivee;
+        state.currentStartCoords = endCoords;
     }
 
     if (state.segments.length > 0) {
@@ -1143,17 +1167,21 @@ function bindEvents() {
 
     document.getElementById('addSubEtape').onclick  = () => addSousEtapeForm(document.getElementById('subEtapesContainer'));
     document.getElementById('closeSegmentForm').onclick = () => {
-        document.getElementById('segmentFormContainer').style.display = 'none';
+        document.getElementById('segmentFormContainer').classList.add('hidden');
     };
     document.getElementById('saveSegment').onclick = async () => {
         const seg     = state.segments[state.currentSegmentIndex];
-        const newSubs = [];
 
-        for (const div of document.querySelectorAll('.subEtape')) {
+        const divs = [...document.querySelectorAll('.subEtape')].filter(div => {
+            const nom   = div.querySelector('.subEtapeNom')?.value.trim();
+            const heure = div.querySelector('.subEtapeHeure')?.value;
+            return nom && heure;
+        });
+
+        const subResults = await Promise.all(divs.map(async (div) => {
             const inputNom = div.querySelector('.subEtapeNom');
             const nom      = inputNom.value.trim();
             const heure    = div.querySelector('.subEtapeHeure').value;
-            if (!nom || !heure) continue;
 
             const containerEl = div.querySelector('.subEtapeEditorContainer');
             let remarque = "";
@@ -1165,6 +1193,11 @@ function bindEvents() {
             const lonAttr = inputNom.getAttribute('data-lon');
             const coords  = (latAttr && lonAttr) ? [parseFloat(latAttr), parseFloat(lonAttr)] : await getCoordinate(nom);
 
+            return { nom, heure, remarque, coords };
+        }));
+
+        const newSubs = [];
+        for (const { nom, heure, remarque, coords } of subResults) {
             if (coords) {
                 newSubs.push({ nom, heure, remarque, coords, lat: coords[0], lon: coords[1] });
                 addMarker(nom, coords, "sous_etape", `<b>${nom}</b><br>${heure}`);
@@ -1175,7 +1208,7 @@ function bindEvents() {
 
         seg.sousEtapes = newSubs;
         await updateRouteSegment(state.currentSegmentIndex, seg.modeTransport || 'Voiture');
-        document.getElementById('segmentFormContainer').style.display = 'none';
+        document.getElementById('segmentFormContainer').classList.add('hidden');
     };
 
     const saveBtn = document.getElementById('saveRoadtrip');
