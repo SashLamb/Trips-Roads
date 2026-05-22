@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\RoadtripsController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -30,7 +29,6 @@ class RoadtripsControllerTest extends TestCase
         'app.SharedRoadtrips',
         'app.Trips',
         'app.PointsOfInterests',
-        'app.PointsOfInterestsRoadtrips',
     ];
 
     /**

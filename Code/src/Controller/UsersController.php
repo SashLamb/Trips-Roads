@@ -3,14 +3,16 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use Cake\Core\Configure;
 use Cake\Event\EventInterface;
 use Cake\Http\Cookie\Cookie;
+use Cake\Http\Response;
 use Cake\I18n\FrozenTime;
-use League\OAuth2\Client\Provider\Google;
-use Cake\Core\Configure;
 use Cake\Mailer\Mailer;
-use Cake\Utility\Security;
 use Cake\Routing\Router;
+use Cake\Utility\Security;
+use Exception;
+use League\OAuth2\Client\Provider\Google;
 
 /**
  * Users Controller
@@ -40,7 +42,9 @@ class UsersController extends AppController
     public function beforeFilter(EventInterface $event)
     {
         parent::beforeFilter($event);
-        $this->Authentication->addUnauthenticatedActions(['login', 'add', 'accessibility', 'loginGoogle', 'callbackGoogle']);
+        $this->Authentication->addUnauthenticatedActions([
+            'login', 'add', 'accessibility', 'loginGoogle', 'callbackGoogle',
+        ]);
     }
 
     /**
@@ -54,6 +58,7 @@ class UsersController extends AppController
         $result = $this->Authentication->getResult();
         if ($result && $result->isValid()) {
             $target = $this->Authentication->getLoginRedirect() ?? '/';
+
             return $this->redirect($target);
         }
         if ($this->request->is('post')) {
@@ -75,7 +80,7 @@ class UsersController extends AppController
         ]);
 
         $authUrl = $provider->getAuthorizationUrl([
-            'scope' => ['email', 'profile']
+            'scope' => ['email', 'profile'],
         ]);
 
         $this->request->getSession()->write('oauth2state', $provider->getState());
@@ -103,12 +108,13 @@ class UsersController extends AppController
         if (empty($state) || ($state !== $savedState)) {
             $session->delete('oauth2state');
             $this->Flash->error(__('État OAuth invalide.'));
+
             return $this->redirect(['action' => 'login']);
         }
 
         try {
             $token = $provider->getAccessToken('authorization_code', [
-                'code' => $this->request->getQuery('code')
+                'code' => $this->request->getQuery('code'),
             ]);
 
             $googleUser = $provider->getResourceOwner($token);
@@ -133,6 +139,7 @@ class UsersController extends AppController
 
                 if (!$this->Users->save($user)) {
                     $this->Flash->error(__('Erreur lors de la création du compte Google.'));
+
                     return $this->redirect(['action' => 'login']);
                 }
             } else {
@@ -147,10 +154,11 @@ class UsersController extends AppController
             $this->Flash->success('Connexion réussie via Google !');
 
             $target = $this->Authentication->getLoginRedirect() ?? '/';
-            return $this->redirect($target);
 
-        } catch (\Exception $e) {
+            return $this->redirect($target);
+        } catch (Exception $e) {
             $this->Flash->error(__('Erreur d\'authentification Google : ') . $e->getMessage());
+
             return $this->redirect(['action' => 'login']);
         }
     }
@@ -179,6 +187,7 @@ class UsersController extends AppController
 
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('L\'utilisateur a été sauvegardé.'));
+
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('L\'utilisateur n\'a pas pu être sauvegardé. Veuillez réessayer.'));
@@ -201,6 +210,7 @@ class UsersController extends AppController
         $result = $this->Authentication->getResult();
         if ($result && $result->isValid()) {
             $this->Authentication->logout();
+
             return $this->redirect(['controller' => 'Users', 'action' => 'login']);
         }
     }
@@ -224,6 +234,7 @@ class UsersController extends AppController
                 unset($data['confirm_password']);
             } elseif ($data['password'] !== $data['confirm_password']) {
                 $this->Flash->error(__('Les mots de passe ne correspondent pas.'));
+
                 return $this->redirect(['controller' => 'Users', 'action' => 'profile']);
             }
 
@@ -231,6 +242,7 @@ class UsersController extends AppController
 
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('Profil mis à jour.'));
+
                 return $this->redirect(['controller' => 'Users', 'action' => 'profile']);
             } else {
                 $this->Flash->error(__('Erreur lors de la mise à jour.'));
@@ -282,7 +294,10 @@ class UsersController extends AppController
         $this->set(compact('user', 'isDarkMode', 'isVisionMode', 'colorBlindType'));
     }
 
-    public function forgotPassword()
+    /**
+     * @return \Cake\Http\Response|null
+     */
+    public function forgotPassword(): ?Response
     {
         if ($this->request->is('post')) {
             $email = $this->request->getData('email');
@@ -296,20 +311,27 @@ class UsersController extends AppController
                     $mailer = new Mailer('default');
                     $mailer->setTo($user->email)
                         ->setSubject('Réinitialisation de votre mot de passe')
-                        ->deliver("Cliquez sur ce lien pour réinitialiser votre mot de passe : " .
+                        ->deliver('Cliquez sur ce lien pour réinitialiser votre mot de passe : ' .
                             Router::url(['action' => 'resetPassword', $user->token], true));
 
                     $this->Flash->success(__('Un email de récupération vous a été envoyé.'));
+
                     return $this->redirect(['action' => 'login']);
                 }
             }
             $this->Flash->error(__('Aucun compte n\'est associé à cet email.'));
         }
     }
-    public function resetPassword($token = null)
+
+    /**
+     * @param string|null $token Password reset token.
+     * @return \Cake\Http\Response|null
+     */
+    public function resetPassword(?string $token = null): ?Response
     {
         if (!$token) {
             $this->Flash->error(__('Jeton invalide.'));
+
             return $this->redirect(['action' => 'login']);
         }
 
@@ -319,6 +341,7 @@ class UsersController extends AppController
 
         if (!$user) {
             $this->Flash->error(__('Le lien a expiré ou est invalide.'));
+
             return $this->redirect(['action' => 'login']);
         }
 
@@ -329,6 +352,7 @@ class UsersController extends AppController
 
             if ($this->Users->save($user)) {
                 $this->Flash->success(__('Votre mot de passe a été mis à jour.'));
+
                 return $this->redirect(['action' => 'login']);
             }
             $this->Flash->error(__('Erreur lors de la mise à jour.'));

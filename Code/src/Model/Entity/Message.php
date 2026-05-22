@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Model\Entity;
 
+use Cake\Core\Configure;
 use Cake\ORM\Entity;
 use Cake\Utility\Security;
-use Cake\Core\Configure;
+use Exception;
 
 /**
  * Message Entity
@@ -43,6 +44,10 @@ class Message extends Entity
         'id' => false,
     ];
 
+    /**
+     * @param string|null $value Raw message body to encrypt.
+     * @return string|null
+     */
     protected function _setBody(?string $value): ?string
     {
         if ($value === null || $value === '') {
@@ -56,12 +61,15 @@ class Message extends Entity
 
         try {
             return Security::encrypt($value, $key);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $value;
         }
     }
 
-    protected function _getContent()
+    /**
+     * @return string
+     */
+    protected function _getContent(): string
     {
         $value = $this->body;
 
@@ -71,6 +79,9 @@ class Message extends Entity
 
         if (is_resource($value)) {
             $value = stream_get_contents($value);
+            if ($value === false) {
+                return '';
+            }
         }
 
         $key = Configure::read('Security.messageKey');
@@ -83,7 +94,7 @@ class Message extends Entity
             if ($decrypted !== false && $decrypted !== null) {
                 return $decrypted;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
         }
 
         if (mb_check_encoding($value, 'UTF-8')) {

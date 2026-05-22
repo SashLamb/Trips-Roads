@@ -90,15 +90,20 @@ class User extends Entity
 
     protected array $_virtual = ['full_name', 'avatar_url'];
 
-    protected function _setPassword(string $password)
+    /**
+     * @param string $password Plain text password to hash.
+     * @return string
+     */
+    protected function _setPassword(string $password): string
     {
         $hasher = new DefaultPasswordHasher();
+
         return $hasher->hash($password);
     }
 
-
     /**
      * Return the full name of the user
+     *
      * @return string
      */
     protected function _getFullName(): string
@@ -120,6 +125,7 @@ class User extends Entity
                 return '/uploads/pp/' . $fileName;
             }
         }
+
         return $defaultImage;
     }
 }

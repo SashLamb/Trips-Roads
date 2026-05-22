@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Test\TestCase\Controller;
 
-use App\Controller\FriendshipsController;
 use Cake\TestSuite\IntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 
@@ -22,7 +21,8 @@ class FriendshipsControllerTest extends TestCase
      * @var array<string>
      */
     protected array $fixtures = [
-        'app.Friendships',
+        'app.Friends',
+        'app.Users',
     ];
 
     /**

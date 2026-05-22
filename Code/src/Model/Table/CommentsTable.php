@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -14,7 +13,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $Users
  * @property \App\Model\Table\RoadtripsTable&\Cake\ORM\Association\BelongsTo $Roadtrips
  * @property \App\Model\Table\PointsOfInterestsTable&\Cake\ORM\Association\BelongsTo $PointsOfInterests
- *
  * @method \App\Model\Entity\Comment newEmptyEntity()
  * @method \App\Model\Entity\Comment newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Comment> newEntities(array $data, array $options = [])
@@ -28,7 +26,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Comment>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Comment> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Comment>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Comment>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Comment>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Comment> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class CommentsTable extends Table
@@ -104,7 +101,10 @@ class CommentsTable extends Table
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
         $rules->add($rules->existsIn(['roadtrip_id'], 'Roadtrips'), ['errorField' => 'roadtrip_id']);
-        $rules->add($rules->existsIn(['points_of_interest_id'], 'PointsOfInterests'), ['errorField' => 'points_of_interest_id']);
+        $rules->add(
+            $rules->existsIn(['points_of_interest_id'], 'PointsOfInterests'),
+            ['errorField' => 'points_of_interest_id'],
+        );
 
         return $rules;
     }

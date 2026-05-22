@@ -57,6 +57,7 @@ class Roadtrip extends Entity
 
     /**
      * Calculate and return the url of the cover image
+     *
      * @return string
      */
     protected function _getCoverImage(): string
@@ -70,15 +71,17 @@ class Roadtrip extends Entity
                 return '/uploads/roadtrips/' . $photoName;
             }
         }
+
         return $defaultImage;
     }
 
     /**
      * Check if the roadtrip is over.
+     *
      * @return bool
      */
     protected function _getIsCompleted(): bool
     {
-        return ($this->status === 'completed' || $this->status === 'termine');
+        return $this->status === 'completed' || $this->status === 'termine';
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use Cake\Http\Response;
-use Cake\Datasource\Exception\RecordNotFoundException;
 
 /**
  * Comments Controller
@@ -43,7 +42,7 @@ class CommentsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found or not owned by user.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $identity = $this->request->getAttribute('identity');
         $query = $this->Comments->find()
@@ -92,7 +91,7 @@ class CommentsController extends AppController
      * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function edit($id = null)
+    public function edit(?string $id = null)
     {
         $userId = $this->request->getAttribute('identity')->getIdentifier();
 
@@ -106,6 +105,7 @@ class CommentsController extends AppController
 
             if ($this->Comments->save($comment)) {
                 $this->Flash->success(__('Le commentaire a été modifié avec succès.'));
+
                 return $this->redirect(['action' => 'index']);
             }
             $this->Flash->error(__('Erreur lors de la sauvegarde.'));
@@ -126,7 +126,7 @@ class CommentsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
      */
-    public function delete($id = null): ?Response
+    public function delete(?string $id = null): ?Response
     {
         $this->request->allowMethod(['post', 'delete']);
         $userId = $this->request->getAttribute('identity')->getIdentifier();

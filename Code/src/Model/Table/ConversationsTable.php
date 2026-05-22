@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -14,7 +13,6 @@ use Cake\Validation\Validator;
  * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $UserOnes
  * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $UserTwos
  * @property \App\Model\Table\MessagesTable&\Cake\ORM\Association\HasMany $Messages
- *
  * @method \App\Model\Entity\Conversation newEmptyEntity()
  * @method \App\Model\Entity\Conversation newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Conversation> newEntities(array $data, array $options = [])
@@ -28,7 +26,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Conversation>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Conversation> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Conversation>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Conversation>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Conversation>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Conversation> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class ConversationsTable extends Table
@@ -92,18 +89,12 @@ class ConversationsTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['user_one_id', 'user_two_id']), ['errorField' => 'user_one_id', 'message' => __('This combination of user_one_id and user_two_id already exists')]);
-        $rules->add($rules->existsIn(['user_one_id'], 'UserOnes'), ['errorField' => 'user_one_id']);
-        $rules->add($rules->existsIn(['user_two_id'], 'UserTwos'), ['errorField' => 'user_two_id']);
-
-
         $rules->add(
             $rules->isUnique(['user_one_id', 'user_two_id']),
-            ['errorField' => 'user_one_id', 'message' => 'Cette conversation existe déjà']
+            ['errorField' => 'user_one_id', 'message' => __('Cette conversation existe déjà')],
         );
-
-        $rules->add($rules->existsIn(['user_one_id'], 'UserOnes'));
-        $rules->add($rules->existsIn(['user_two_id'], 'UserTwos'));
+        $rules->add($rules->existsIn(['user_one_id'], 'UserOnes'), ['errorField' => 'user_one_id']);
+        $rules->add($rules->existsIn(['user_two_id'], 'UserTwos'), ['errorField' => 'user_two_id']);
 
         return $rules;
     }

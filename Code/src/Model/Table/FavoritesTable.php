@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $Users
  * @property \App\Model\Table\RoadtripsTable&\Cake\ORM\Association\BelongsTo $Roadtrips
- *
  * @method \App\Model\Entity\Favorite newEmptyEntity()
  * @method \App\Model\Entity\Favorite newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Favorite> newEntities(array $data, array $options = [])
@@ -27,7 +25,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Favorite>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Favorite> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Favorite>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Favorite>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Favorite>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Favorite> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class FavoritesTable extends Table
@@ -86,7 +83,10 @@ class FavoritesTable extends Table
      */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
-        $rules->add($rules->isUnique(['user_id', 'roadtrip_id']), ['errorField' => 'user_id', 'message' => __('This combination of user_id and roadtrip_id already exists')]);
+        $rules->add(
+            $rules->isUnique(['user_id', 'roadtrip_id']),
+            ['errorField' => 'user_id', 'message' => __('This combination of user_id and roadtrip_id already exists')],
+        );
         $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
         $rules->add($rules->existsIn(['roadtrip_id'], 'Roadtrips'), ['errorField' => 'roadtrip_id']);
 

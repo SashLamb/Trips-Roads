@@ -29,11 +29,10 @@ class UsersTableTest extends TestCase
         'app.Comments',
         'app.FavoritePlaces',
         'app.Favorites',
-        'app.Friendships',
+        'app.Friends',
         'app.Histories',
         'app.PointsOfInterests',
         'app.Roadtrips',
-        'app.UserTokens',
     ];
 
     /**

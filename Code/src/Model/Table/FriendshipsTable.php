@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\UsersTable&\Cake\ORM\Association\BelongsTo $Users
  * @property \App\Model\Table\FriendshipsTable&\Cake\ORM\Association\BelongsTo $Friendships
- *
  * @method \App\Model\Entity\Friend newEmptyEntity()
  * @method \App\Model\Entity\Friend newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Friend> newEntities(array $data, array $options = [])
@@ -27,7 +25,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Friend>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Friend> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Friend>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Friend>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Friend>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Friend> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class FriendshipsTable extends Table
@@ -91,5 +88,11 @@ class FriendshipsTable extends Table
      * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
      * @return \Cake\ORM\RulesChecker
      */
+    public function buildRules(RulesChecker $rules): RulesChecker
+    {
+        $rules->add($rules->existsIn(['user_id'], 'Users'), ['errorField' => 'user_id']);
+        $rules->add($rules->existsIn(['friend_id'], 'FriendsUsers'), ['errorField' => 'friend_id']);
 
+        return $rules;
+    }
 }

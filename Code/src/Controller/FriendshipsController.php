@@ -36,7 +36,7 @@ class FriendshipsController extends AppController
                         'Users.first_name LIKE' => '%' . $search . '%',
                         'Users.last_name LIKE' => '%' . $search . '%',
                     ],
-                    'Users.id !=' => $userId
+                    'Users.id !=' => $userId,
                 ])
                 ->limit(20)
                 ->all();
@@ -48,7 +48,7 @@ class FriendshipsController extends AppController
                 'OR' => [
                     ['user_id' => $userId],
                     ['friend_id' => $userId],
-                ]
+                ],
             ])
             ->contain(['Users', 'FriendsUsers'])
             ->all();
@@ -58,12 +58,12 @@ class FriendshipsController extends AppController
             if ($friendship->user_id === $userId && !empty($friendship->friends_user)) {
                 $friendsList[] = [
                     'friend' => $friendship->friends_user,
-                    'friendship_id' => $friendship->id
+                    'friendship_id' => $friendship->id,
                 ];
             } elseif ($friendship->friend_id === $userId && !empty($friendship->user)) {
                 $friendsList[] = [
                     'friend' => $friendship->user,
-                    'friendship_id' => $friendship->id
+                    'friendship_id' => $friendship->id,
                 ];
             }
         }
@@ -71,7 +71,7 @@ class FriendshipsController extends AppController
         $requests = $this->Friendships->find()
             ->where([
                 'friend_id' => $userId,
-                'status' => 'pending'
+                'status' => 'pending',
             ])
             ->contain(['Users'])
             ->all();
@@ -87,7 +87,7 @@ class FriendshipsController extends AppController
      * @return \Cake\Http\Response|null|void Renders view
      * @throws \Cake\Http\Exception\ForbiddenException When trying to view unauthorized data.
      */
-    public function view($id = null)
+    public function view(?string $id = null)
     {
         $identity = $this->request->getAttribute('identity');
         $userId = (int)$identity->getIdentifier();
@@ -110,7 +110,7 @@ class FriendshipsController extends AppController
      * @param string|null $friendId Friend user id.
      * @return \Cake\Http\Response|null Redirects on success.
      */
-    public function add($friendId = null): ?Response
+    public function add(?string $friendId = null): ?Response
     {
         $this->request->allowMethod(['post']);
 
@@ -119,11 +119,13 @@ class FriendshipsController extends AppController
 
         if ($userId === $friendId) {
             $this->Flash->error(__('Action invalide : vous ne pouvez pas vous ajouter vous-même.'));
+
             return $this->redirect(['action' => 'index']);
         }
 
         if (!$this->Friendships->Users->exists(['id' => $friendId])) {
             $this->Flash->error(__('Utilisateur introuvable.'));
+
             return $this->redirect(['action' => 'index']);
         }
 
@@ -132,7 +134,7 @@ class FriendshipsController extends AppController
                 'OR' => [
                     ['user_id' => $userId, 'friend_id' => $friendId],
                     ['user_id' => $friendId, 'friend_id' => $userId],
-                ]
+                ],
             ])
             ->first();
 
@@ -148,19 +150,20 @@ class FriendshipsController extends AppController
                     $friendship = $this->Friendships->patchEntity($friendship, [
                         'user_id' => $userId,
                         'friend_id' => $friendId,
-                        'status' => 'pending'
+                        'status' => 'pending',
                     ]);
                     $this->Friendships->save($friendship);
                     $this->Flash->success(__('Nouvelle demande d’ami envoyée.'));
                     break;
             }
+
             return $this->redirect(['action' => 'index']);
         }
 
         $newFriendship = $this->Friendships->newEntity([
             'user_id' => $userId,
             'friend_id' => $friendId,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         if ($this->Friendships->save($newFriendship)) {
@@ -179,7 +182,7 @@ class FriendshipsController extends AppController
      * @param string|null $id Friendship id.
      * @return \Cake\Http\Response|null Redirects to index.
      */
-    public function accept($id = null): ?Response
+    public function accept(?string $id = null): ?Response
     {
         $this->request->allowMethod(['post', 'get']);
         $userId = (int)$this->Authentication->getIdentity()->getIdentifier();
@@ -188,12 +191,13 @@ class FriendshipsController extends AppController
             ->where([
                 'id' => $id,
                 'friend_id' => $userId,
-                'status' => 'pending'
+                'status' => 'pending',
             ])
             ->first();
 
         if (!$friendship) {
             $this->Flash->error(__('Demande introuvable ou déjà traitée.'));
+
             return $this->redirect(['action' => 'index']);
         }
 
@@ -215,7 +219,7 @@ class FriendshipsController extends AppController
      * @param string|null $id Friendship id.
      * @return \Cake\Http\Response|null Redirects to index.
      */
-    public function reject($id = null): ?Response
+    public function reject(?string $id = null): ?Response
     {
         $this->request->allowMethod(['post', 'get']);
         $userId = (int)$this->Authentication->getIdentity()->getIdentifier();
@@ -224,12 +228,13 @@ class FriendshipsController extends AppController
             ->where([
                 'id' => $id,
                 'friend_id' => $userId,
-                'status' => 'pending'
+                'status' => 'pending',
             ])
             ->first();
 
         if (!$friendship) {
             $this->Flash->error(__('Demande introuvable.'));
+
             return $this->redirect(['action' => 'index']);
         }
 
@@ -250,7 +255,7 @@ class FriendshipsController extends AppController
      * @return \Cake\Http\Response|null Redirects to index.
      * @throws \Cake\Http\Exception\ForbiddenException
      */
-    public function delete($id = null): ?Response
+    public function delete(?string $id = null): ?Response
     {
         $this->request->allowMethod(['post', 'delete']);
         $userId = (int)$this->Authentication->getIdentity()->getIdentifier();

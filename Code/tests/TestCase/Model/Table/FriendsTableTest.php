@@ -24,7 +24,7 @@ class FriendsTableTest extends TestCase
      * @var array<string>
      */
     protected array $fixtures = [
-        'app.Friendships',
+        'app.Friends',
         'app.Users',
     ];
 

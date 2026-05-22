@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Model\Entity\Message;
 use Cake\Http\Exception\ForbiddenException;
 
 /**
@@ -35,13 +34,13 @@ class MessagesController extends AppController
      * @return \Cake\Http\Response|null Redirects to the conversation view.
      * @throws \Cake\Http\Exception\ForbiddenException
      */
-    public function start($friendId = null)
+    public function start(?string $friendId = null)
     {
         $userId = $this->Authentication->getIdentity()->getIdentifier();
         $friendId = (int)$friendId;
 
         if ($userId === $friendId) {
-            throw new ForbiddenException("Vous ne pouvez pas discuter avec vous-même.");
+            throw new ForbiddenException('Vous ne pouvez pas discuter avec vous-même.');
         }
 
         $friendshipsTable = $this->getTableLocator()->get('Friendships');
@@ -52,7 +51,7 @@ class MessagesController extends AppController
                 'OR' => [
                     ['user_id' => $userId, 'friend_id' => $friendId],
                     ['user_id' => $friendId, 'friend_id' => $userId],
-                ]
+                ],
             ])
             ->first();
 
@@ -70,7 +69,7 @@ class MessagesController extends AppController
      * @param string|null $friendId The ID of the friend.
      * @return \Cake\Http\Response|null|void Renders view or redirects if no ID.
      */
-    public function view($friendId = null)
+    public function view(?string $friendId = null)
     {
         $userId = $this->Authentication->getIdentity()->getIdentifier();
         $friendId = (int)$friendId;
@@ -88,14 +87,14 @@ class MessagesController extends AppController
                 'OR' => [
                     ['sender_id' => $userId, 'recipient_id' => $friendId],
                     ['sender_id' => $friendId, 'recipient_id' => $userId],
-                ]
+                ],
             ])
             ->orderAsc('created')
             ->all();
 
         $this->Messages->updateAll(
             ['is_read' => 1, 'read_at' => date('Y-m-d H:i:s')],
-            ['sender_id' => $friendId, 'recipient_id' => $userId, 'is_read' => 0]
+            ['sender_id' => $friendId, 'recipient_id' => $userId, 'is_read' => 0],
         );
 
         $conversationId = $friendId;
@@ -129,7 +128,7 @@ class MessagesController extends AppController
             if (!$conversation) {
                 $conversation = $conversationsTable->newEntity([
                     'user_one_id' => $userId,
-                    'user_two_id' => $friendId
+                    'user_two_id' => $friendId,
                 ]);
                 $conversationsTable->save($conversation);
             }
@@ -139,7 +138,7 @@ class MessagesController extends AppController
                 'recipient_id' => $friendId,
                 'conversation_id' => $conversation->id,
                 'body' => $body,
-                'is_read' => 0
+                'is_read' => 0,
             ]);
 
             $this->Messages->save($message);

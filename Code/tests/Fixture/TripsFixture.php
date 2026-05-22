@@ -30,6 +30,7 @@ class TripsFixture extends TestFixture
                 'avoid_highways' => 1,
                 'avoid_tolls' => 1,
                 'departure_time' => '08:04:53',
+                'date' => '2026-01-01',
             ],
         ];
         parent::init();

@@ -26,8 +26,7 @@ class MessagesTableTest extends TestCase
     protected array $fixtures = [
         'app.Messages',
         'app.Conversations',
-        'app.Senders',
-        'app.Recipients',
+        'app.Users',
     ];
 
     /**

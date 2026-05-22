@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\TripsTable&\Cake\ORM\Association\BelongsTo $Trips
  * @property \App\Model\Table\SubStepPhotosTable&\Cake\ORM\Association\HasMany $SubStepPhotos
- *
  * @method \App\Model\Entity\SubStep newEmptyEntity()
  * @method \App\Model\Entity\SubStep newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\SubStep> newEntities(array $data, array $options = [])

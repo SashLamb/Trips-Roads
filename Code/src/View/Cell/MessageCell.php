@@ -36,14 +36,14 @@ class MessageCell extends Cell
             ->contain([
                 'Messages' => function ($q) {
                     return $q->orderBy(['Messages.created' => 'DESC'])->limit(1);
-                }
+                },
             ])
             ->all();
 
         $formattedConversations = [];
 
         foreach ($conversations as $conv) {
-            $friendId = ($conv->user_one_id === $userId) ? $conv->user_two_id : $conv->user_one_id;
+            $friendId = $conv->user_one_id === $userId ? $conv->user_two_id : $conv->user_one_id;
             $friend = $usersTable->get($friendId);
 
             $lastMessage = !empty($conv->messages) ? $conv->messages[0] : null;
@@ -51,13 +51,14 @@ class MessageCell extends Cell
             $formattedConversations[] = [
                 'friend' => $friend,
                 'lastMessage' => $lastMessage,
-                'isActive' => ($friendId === $activeFriendId)
+                'isActive' => ($friendId === $activeFriendId),
             ];
         }
 
-        usort($formattedConversations, function($a, $b) {
+        usort($formattedConversations, function ($a, $b) {
             $timeA = $a['lastMessage'] ? $a['lastMessage']->created->toUnixString() : 0;
             $timeB = $b['lastMessage'] ? $b['lastMessage']->created->toUnixString() : 0;
+
             return $timeB <=> $timeA;
         });
 

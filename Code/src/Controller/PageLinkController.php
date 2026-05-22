@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Cake\Mailer\Mailer;
+use Cake\Core\Configure;
 use Cake\Log\Log;
+use Cake\Mailer\Mailer;
+use Exception;
 
 /**
  * PageLink Controller
@@ -35,6 +37,7 @@ class PageLinkController extends AppController
             if (!empty($data['email']) && !empty($data['message'])) {
                 if ($this->_sendEmail($data, 'contact')) {
                     $this->Flash->success(__('Votre message a bien été envoyé ! Nous vous répondrons sous peu.'));
+
                     return $this->redirect(['action' => 'contact']);
                 } else {
                     $this->Flash->error(__('Erreur technique lors de l\'envoi. Veuillez réessayer plus tard.'));
@@ -57,7 +60,9 @@ class PageLinkController extends AppController
 
             if (!empty($data['email']) && !empty($data['question'])) {
                 if ($this->_sendEmail($data, 'faq')) {
-                    $this->Flash->success(__('Votre question a bien été envoyée ! Nous vous répondrons dès que possible.'));
+                    $msg = __('Votre question a bien été envoyée ! Nous vous répondrons dès que possible.');
+                    $this->Flash->success($msg);
+
                     return $this->redirect(['action' => 'faq']);
                 } else {
                     $this->Flash->error(__('Erreur technique lors de l\'envoi. Veuillez réessayer plus tard.'));
@@ -113,28 +118,30 @@ class PageLinkController extends AppController
             $content = $data['message'] ?? $data['question'] ?? '';
 
             $emailSubject = ($type === 'faq' ? 'FAQ Site : ' : 'Contact Site : ') . $subject;
-            $introText = ($type === 'faq')
+            $introText = $type === 'faq'
                 ? "Nouvelle question reçue depuis le site web :\n\n"
                 : "Nouveau message reçu depuis le site web :\n\n";
 
+            $contactEmail = Configure::read('App.contactEmail', 'tripsandroad@gmail.com');
             $mailer
                 ->setTransport('default')
-                ->setFrom(['tripsandroad@gmail.com' => 'Site Trips & Roads'])
-                ->setTo('tripsandroad@gmail.com')
+                ->setFrom([$contactEmail => 'Site Trips & Roads'])
+                ->setTo($contactEmail)
                 ->setReplyTo($data['email'], $name)
                 ->setSubject($emailSubject)
                 ->deliver(
                     $introText .
-                    "Nom : " . $name . "\n" .
-                    "Email : " . $data['email'] . "\n" .
-                    "Sujet : " . $subject . "\n\n" .
+                    'Nom : ' . $name . "\n" .
+                    'Email : ' . $data['email'] . "\n" .
+                    'Sujet : ' . $subject . "\n\n" .
                     "--------------------------------------------------\n" .
-                    "Contenu :\n" . $content
+                    "Contenu :\n" . $content,
                 );
 
             return true;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Erreur lors de l\'envoi d\'email : ' . $e->getMessage());
+
             return false;
         }
     }

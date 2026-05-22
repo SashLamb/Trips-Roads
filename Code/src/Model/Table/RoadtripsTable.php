@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
+use ArrayObject;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
+use Cake\Log\Log;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use Cake\Event\EventInterface;
-use Cake\Datasource\EntityInterface;
-use ArrayObject;
+use Exception;
+use Laminas\Diactoros\UploadedFile;
 
 /**
  * Roadtrips Model
@@ -21,7 +23,6 @@ use ArrayObject;
  * @property \App\Model\Table\SharedRoadtripsTable&\Cake\ORM\Association\HasMany $SharedRoadtrips
  * @property \App\Model\Table\TripsTable&\Cake\ORM\Association\HasMany $Trips
  * @property \App\Model\Table\PointsOfInterestsTable&\Cake\ORM\Association\BelongsToMany $PointsOfInterests
- *
  * @method \App\Model\Entity\Roadtrip newEmptyEntity()
  * @method \App\Model\Entity\Roadtrip newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Roadtrip> newEntities(array $data, array $options = [])
@@ -35,7 +36,6 @@ use ArrayObject;
  * @method iterable<\App\Model\Entity\Roadtrip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Roadtrip> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Roadtrip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Roadtrip>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Roadtrip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Roadtrip> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class RoadtripsTable extends Table
@@ -95,8 +95,7 @@ class RoadtripsTable extends Table
     {
         $photo = $entity->get('photo_cover');
 
-        if ($photo instanceof \Laminas\Diactoros\UploadedFile && $photo->getError() === UPLOAD_ERR_OK) {
-
+        if ($photo instanceof UploadedFile && $photo->getError() === UPLOAD_ERR_OK) {
             $ext = pathinfo($photo->getClientFilename(), PATHINFO_EXTENSION);
             $newName = 'rt_' . uniqid() . '.' . $ext;
 
@@ -111,8 +110,8 @@ class RoadtripsTable extends Table
                 $photo->moveTo($destination);
 
                 $entity->set('photo_url', $newName);
-            } catch (\Exception $e) {
-                \Cake\Log\Log::error("Erreur lors de l'upload de l'image du roadtrip : " . $e->getMessage());
+            } catch (Exception $e) {
+                Log::error("Erreur lors de l'upload de l'image du roadtrip : " . $e->getMessage());
             }
         }
     }

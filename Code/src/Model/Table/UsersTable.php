@@ -3,13 +3,15 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
+use ArrayObject;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
+use Cake\Log\Log;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use Cake\Event\EventInterface;
-use Cake\Datasource\EntityInterface;
-use ArrayObject;
+use Exception;
+use Laminas\Diactoros\UploadedFile;
 
 /**
  * Users Model
@@ -23,7 +25,6 @@ use ArrayObject;
  * @property \App\Model\Table\PointsOfInterestsTable&\Cake\ORM\Association\HasMany $PointsOfInterests
  * @property \App\Model\Table\RoadtripsTable&\Cake\ORM\Association\HasMany $Roadtrips
  * @property \App\Model\Table\UserTokensTable&\Cake\ORM\Association\HasMany $UserTokens
- *
  * @method \App\Model\Entity\User newEmptyEntity()
  * @method \App\Model\Entity\User newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\User> newEntities(array $data, array $options = [])
@@ -37,7 +38,6 @@ use ArrayObject;
  * @method iterable<\App\Model\Entity\User>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\User> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\User>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\User>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\User>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\User> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class UsersTable extends Table
@@ -100,8 +100,7 @@ class UsersTable extends Table
     {
         $photo = $entity->get('profile_picture_file');
 
-        if ($photo instanceof \Laminas\Diactoros\UploadedFile && $photo->getError() === UPLOAD_ERR_OK) {
-
+        if ($photo instanceof UploadedFile && $photo->getError() === UPLOAD_ERR_OK) {
             $ext = pathinfo($photo->getClientFilename(), PATHINFO_EXTENSION);
             $newName = 'pp_' . uniqid() . '.' . $ext;
 
@@ -115,8 +114,8 @@ class UsersTable extends Table
             try {
                 $photo->moveTo($destination);
                 $entity->set('profile_picture', $newName);
-            } catch (\Exception $e) {
-                \Cake\Log\Log::error("Error uploading profile picture: " . $e->getMessage());
+            } catch (Exception $e) {
+                Log::error('Error uploading profile picture: ' . $e->getMessage());
             }
         }
     }

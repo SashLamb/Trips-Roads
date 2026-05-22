@@ -10,6 +10,8 @@ use Cake\TestSuite\Fixture\TestFixture;
  */
 class FriendsFixture extends TestFixture
 {
+    public string $tableAlias = 'Friendships';
+
     /**
      * Init method
      *

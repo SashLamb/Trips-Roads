@@ -52,15 +52,15 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('user_id')
-                    ->setName('id_utilisateur')
+                    ->setName('comments_user_id')
             )
             ->addIndex(
                 $this->index('roadtrip_id')
-                    ->setName('id_roadtrip')
+                    ->setName('comments_roadtrip_id')
             )
             ->addIndex(
                 $this->index('points_of_interest_id')
-                    ->setName('id_poi')
+                    ->setName('comments_poi_id')
             )
             ->create();
 
@@ -139,7 +139,7 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('user_id')
-                    ->setName('id_utilisateur')
+                    ->setName('fav_places_user_id')
             )
             ->create();
 
@@ -171,7 +171,7 @@ class Initial extends BaseMigration
             )
             ->addIndex(
                 $this->index('roadtrip_id')
-                    ->setName('id_roadtrip')
+                    ->setName('favorites_roadtrip_id')
             )
             ->addIndex(
                 $this->index('user_id')
@@ -204,11 +204,11 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('user_id')
-                    ->setName('user_id')
+                    ->setName('friends_user_id')
             )
             ->addIndex(
                 $this->index('friend_id')
-                    ->setName('friend_id')
+                    ->setName('friends_friend_id')
             )
             ->create();
 
@@ -269,11 +269,11 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('user_id')
-                    ->setName('id_utilisateur')
+                    ->setName('histories_user_id')
             )
             ->addIndex(
                 $this->index('roadtrip_id')
-                    ->setName('id_roadtrip')
+                    ->setName('histories_roadtrip_id')
             )
             ->create();
 
@@ -395,7 +395,7 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('user_id')
-                    ->setName('user_id')
+                    ->setName('notif_prefs_user_id')
                     ->setType('unique')
             )
             ->create();
@@ -490,7 +490,7 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('points_of_interest_id')
-                    ->setName('id_poi')
+                    ->setName('poi_roadtrips_poi_id')
             )
             ->create();
 
@@ -601,7 +601,7 @@ class Initial extends BaseMigration
             ])
             ->addIndex(
                 $this->index('roadtrip_id')
-                    ->setName('id_roadtrip')
+                    ->setName('shared_roadtrips_roadtrip_id')
             )
             ->create();
 

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -12,7 +11,6 @@ use Cake\Validation\Validator;
  * SharedRoadtrips Model
  *
  * @property \App\Model\Table\RoadtripsTable&\Cake\ORM\Association\BelongsTo $Roadtrips
- *
  * @method \App\Model\Entity\SharedRoadtrip newEmptyEntity()
  * @method \App\Model\Entity\SharedRoadtrip newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\SharedRoadtrip> newEntities(array $data, array $options = [])
@@ -26,7 +24,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\SharedRoadtrip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\SharedRoadtrip> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\SharedRoadtrip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\SharedRoadtrip>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\SharedRoadtrip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\SharedRoadtrip> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class SharedRoadtripsTable extends Table

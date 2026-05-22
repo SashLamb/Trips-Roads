@@ -3,25 +3,29 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
+use App\Model\Entity\Message;
+use ArrayObject;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use Cake\Event\EventInterface;
-use Cake\Datasource\EntityInterface;
-use ArrayObject;
 
 /**
- * Messages Model - Simplifié
- * Sans les associations inutiles
+ * Messages Model
  */
 class MessagesTable extends Table
 {
+    /**
+     * @param array<string, mixed> $config Table configuration.
+     * @return void
+     */
     public function initialize(array $config): void
     {
         parent::initialize($config);
 
         $this->setTable('messages');
-        $this->setEntityClass(\App\Model\Entity\Message::class);
+        $this->setEntityClass(Message::class);
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
 
@@ -45,6 +49,10 @@ class MessagesTable extends Table
         ]);
     }
 
+    /**
+     * @param \Cake\Validation\Validator $validator Validator instance.
+     * @return \Cake\Validation\Validator
+     */
     public function validationDefault(Validator $validator): Validator
     {
         $validator
@@ -62,7 +70,7 @@ class MessagesTable extends Table
         $validator
             ->maxLength('body', 4294967295)
             ->requirePresence('body', 'create')
-            ->allowEmptyString('body') ;
+            ->allowEmptyString('body');
 
         $validator
             ->boolean('is_read')
@@ -76,6 +84,10 @@ class MessagesTable extends Table
         return $validator;
     }
 
+    /**
+     * @param \Cake\ORM\RulesChecker $rules The rules object to be modified.
+     * @return \Cake\ORM\RulesChecker
+     */
     public function buildRules(RulesChecker $rules): RulesChecker
     {
         $rules->add($rules->existsIn(['conversation_id'], 'Conversations'));
@@ -86,13 +98,12 @@ class MessagesTable extends Table
     }
 
     /**
-     * Méthode exécutée avant chaque sauvegarde d'une entité Message
-     */
-    /**
-     * Méthode exécutée avant chaque sauvegarde d'une entité Message
+     * @param \Cake\Event\EventInterface $event The event.
+     * @param \Cake\Datasource\EntityInterface $entity The entity being saved.
+     * @param \ArrayObject $options Save options.
+     * @return void
      */
     public function beforeSave(EventInterface $event, EntityInterface $entity, ArrayObject $options): void
     {
-        //dd($event);
     }
 }

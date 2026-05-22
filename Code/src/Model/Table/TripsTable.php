@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model\Table;
 
-use Cake\ORM\Query\SelectQuery;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use Cake\Validation\Validator;
  *
  * @property \App\Model\Table\RoadtripsTable&\Cake\ORM\Association\BelongsTo $Roadtrips
  * @property \App\Model\Table\SubStepsTable&\Cake\ORM\Association\HasMany $SubSteps
- *
  * @method \App\Model\Entity\Trip newEmptyEntity()
  * @method \App\Model\Entity\Trip newEntity(array $data, array $options = [])
  * @method array<\App\Model\Entity\Trip> newEntities(array $data, array $options = [])
@@ -27,7 +25,6 @@ use Cake\Validation\Validator;
  * @method iterable<\App\Model\Entity\Trip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Trip> saveManyOrFail(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Trip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Trip>|false deleteMany(iterable $entities, array $options = [])
  * @method iterable<\App\Model\Entity\Trip>|\Cake\Datasource\ResultSetInterface<\App\Model\Entity\Trip> deleteManyOrFail(iterable $entities, array $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class TripsTable extends Table
