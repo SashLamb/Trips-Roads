@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\sasha\\\\Documents\\\\GitHub\\\\road-trip\\\\Code\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(xargs wc -l)",
+      "Bash(composer cs-check *)",
+      "Bash(vendor/bin/phpstan analyse *)",
+      "Bash(composer cs-fix *)",
+      "Bash(composer test *)",
+      "Bash(sort -t\"'\" -k2)",
+      "Bash(rm -f tmp/tests.sqlite)",
+      "Bash(php -r ' *)",
+      "Bash(vendor/bin/phpunit tests/TestCase/Model/Table/FriendsTableTest.php --no-coverage)",
+      "Bash(vendor/bin/phpunit tests/TestCase/Controller/FriendshipsControllerTest.php --no-coverage)",
+      "Bash(vendor/bin/phpunit tests/TestCase/Controller/CommentsControllerTest.php tests/TestCase/Controller/FriendshipsControllerTest.php --no-coverage)",
+      "Bash(grep -n 'public.*connection\\\\|protected.*connection\\\\|string $connection' 'C:\\\\Users\\\\sasha\\\\Documents\\\\GitHub\\\\road-trip\\\\Code\\\\vendor\\\\cakephp\\\\cakephp\\\\src\\\\TestSuite\\\\Fixture\\\\TestFixture.php')",
+      "Bash(vendor/bin/phpunit tests/TestCase/Controller/ --no-coverage)",
+      "Bash(vendor/bin/phpunit tests/TestCase/Model/ --no-coverage)",
+      "Bash(vendor/bin/phpunit tests/TestCase/Controller/ tests/TestCase/Model/ --no-coverage)",
+      "Bash(vendor/bin/phpunit tests/TestCase/ApplicationTest.php tests/TestCase/Controller/ tests/TestCase/Model/ --no-coverage)",
+      "Bash(vendor/bin/phpunit tests/TestCase/ApplicationTest.php tests/TestCase/Controller/FriendshipsControllerTest.php --no-coverage)",
+      "Bash(composer check *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
